@@ -71,6 +71,7 @@ public class FCLogService extends Service implements Runnable {
         final String GET_LOG_CMD = "logcat -v threadtime" + "\n";
         //头部识别
         final String LOG_SEPARATOR = "--------- beginning of ";
+        //Native崩溃头部识别
         final String[] N_SIGNAL = {"DEBUG", "F", "*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***"};
         final String[] J_SIGNAL = {"AndroidRuntime", "E", "FATAL EXCEPTION"};
         //日志示例："ANR in com.android.development (com.android.development/.BadBehaviorActivity)"
