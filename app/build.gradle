@@ -1,24 +1,22 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion "21.1.0"
-
+    compileSdkVersion 27
     defaultConfig {
         applicationId "com.ryuunoakaihitomi.ForceCloseLogcat"
-        minSdkVersion 14
-        targetSdkVersion 21
-        versionCode 26
-        versionName "5.1"
+        minSdkVersion 19
+        targetSdkVersion 27
+        versionCode 27
+        versionName "6.0"
     }
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    //implementation fileTree(dir: 'libs', include: ['*.jar'])
 }

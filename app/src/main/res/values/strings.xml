@@ -1,7 +1,38 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name">应用崩溃日志记录器</string>
-    <string name="hello_world">Hello world!</string>
-
+    <string name="service_name">日志读取服务</string>
+    <string name="running">启动中…</string>
+    <string name="fcnoti_subtext">来自%s(%s)</string>
+    <string name="fc_found">已捕获FC</string>
+    <string name="share">分享</string>
+    <string name="copy">复制</string>
+    <string name="delete">删除</string>
+    <string name="application_fc_log">应用Force Close日志</string>
+    <string name="send_log_to_developer">将日志内容发送给开发者</string>
+    <string name="settings">设置</string>
+    <string name="do_not_auto_run">开机不自动运行</string>
+    <string name="quiet_mode">安静模式</string>
+    <string name="one_noti">单条通知</string>
+    <string name="white_list">白名单</string>
+    <string name="sys_app">系统应用</string>
+    <string name="usr_app">用户应用</string>
+    <string name="save">保存</string>
+    <string name="help">帮助</string>
+    <string name="white_list_editor">白名单编辑器</string>
+    <string name="donate">捐赠</string>
+    <string name="dl_link">官方下载链接</string>
+    <string name="log_reader">日志阅读器</string>
+    <string name="env_info">环境信息</string>
+    <string name="log_body">日志内容</string>
+    <string name="log_path">日志文件地址</string>
+    <string name="copied_info">已复制到剪贴板</string>
+    <string name="start_service">启动服务</string>
+    <string name="welcome">你似乎是第一次使用本应用,在使用之前,希望你不会介意先看一下帮助说明</string>
+    <string name="processing_please_wait">正在处理,请稍候…</string>
+    <string name="kill_service">结束服务</string>
+    <string name="no_read_log_perm">没有读取系统日志的权限,服务无法运行!!!</string>
+    <string name="saved">已保存</string>
+    <string name="help_toast">应用版本：%s \n帮助更新日期：%s</string>
+    <string name="help_update_time">20180506</string>
+    <string name="service_running">日志监听服务开始运行</string>
 </resources>
