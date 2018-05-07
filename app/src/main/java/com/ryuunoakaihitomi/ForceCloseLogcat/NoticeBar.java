@@ -32,7 +32,6 @@ public class NoticeBar {
 
     private static Intent operationBaseIntent(String whichAction) {
         return new Intent(whichAction)
-                .setData(Uri.parse("custom://" + System.currentTimeMillis()))
                 .putExtra(LogViewer.EXTAG_PATH, FCLogInfoBridge.getLogPath())
                 .putExtra(LogViewer.EXTAG_ENVINFO, RuntimeEnvInfo.get())
                 .putExtra(LogViewer.EXTAG_NOTICE_ID, id);
