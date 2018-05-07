@@ -127,7 +127,7 @@ public class FCLogService extends Service implements Runnable {
                             final long start = System.currentTimeMillis();
                             Log.d(TAG, "run: CrashLogPrinter: PID:" + logObject.getPID() + " TID:" + logObject.getTID());
                             while (Arrays.asList(new String[]{J_SIGNAL[0], N_SIGNAL[0], ANR_SIGNAL[0]}).contains(
-                                    //又会读取到分隔符
+                                    //可能又会读取到分隔符
                                     new LogObject(line = bufferedReader.readLine()).getTag())) {
                                 if (line.contains(J_PROC_SIGNAL[0])) {
                                     String pkgNameTmp;
@@ -169,8 +169,8 @@ public class FCLogService extends Service implements Runnable {
                                         String path = LOG_DIR + "/" + time + "_" + FCLogInfoBridge.getFcPackageName() + ".log";
                                         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT)
                                             path = path.replace(':', '.');
-                                        final String writeLogShell = "logcat -v raw -d -s AndroidRuntime:E,DEBUG:F,ActivityManager:E";
-                                        TxtFileIO.W(path, Utils.cmd(writeLogShell, Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || Build.VERSION.SDK_INT > Build.VERSION_CODES.O));
+                                        final String LOG_FILTER_OUTPUT_CMD = "logcat -v raw -d -s AndroidRuntime:E,DEBUG:F,ActivityManager:E";
+                                        TxtFileIO.W(path, Utils.cmd(LOG_FILTER_OUTPUT_CMD, Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || Build.VERSION.SDK_INT > Build.VERSION_CODES.O));
                                         long logLength = new File(path).length();
                                         Log.d(TAG, "run: logLength:" + logLength);
                                         FCLogInfoBridge.setLogPath(path);
@@ -179,7 +179,7 @@ public class FCLogService extends Service implements Runnable {
                                         else
                                             震える();
                                     }
-                                    Log.i(TAG, "run: A Workflow :" + (System.currentTimeMillis() - start) + "ms");
+                                    Log.i(TAG, "run: A Workflow in " + (System.currentTimeMillis() - start) + "ms");
                                     //不清除日志在短时间发生多次崩溃时将会重复输出，但极不方便调试
                                     cleanLog();
                                 }

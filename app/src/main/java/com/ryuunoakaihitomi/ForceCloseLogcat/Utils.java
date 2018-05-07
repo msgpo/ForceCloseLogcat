@@ -55,6 +55,7 @@ public class Utils {
      *
      * @param command 所执行的命令
      * @param isRoot  是否需要root
+     * @return 标准输入流
      */
     static synchronized String cmd(String command, boolean isRoot) {
         StringBuilder ret = new StringBuilder("");
