@@ -12,7 +12,6 @@ import android.widget.Toast;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 
 public class Utils {
     /**
@@ -44,7 +43,7 @@ public class Utils {
         }
     }
 
-    static void cmd(String command, boolean isRoot) {
+    static synchronized void cmd(String command, boolean isRoot) {
         try {
             Process p;
             if (isRoot) {
@@ -52,10 +51,14 @@ public class Utils {
             } else {
                 p = Runtime.getRuntime().exec("sh");
             }
-            OutputStreamWriter osw = new OutputStreamWriter(p.getOutputStream(), "UTF-8");
+            DataOutputStream d = new DataOutputStream(p.getOutputStream());
+            d.writeBytes(command + "\n");
+            d.writeBytes("exit\n");
+            d.flush();
+            /*OutputStreamWriter osw = new OutputStreamWriter(p.getOutputStream(), "UTF-8");
             osw.write(command + "\n");
             osw.write("exit\n");
-            osw.flush();
+            osw.flush();*/
             p.getErrorStream().close();
         } catch (IOException e) {
             e.printStackTrace();

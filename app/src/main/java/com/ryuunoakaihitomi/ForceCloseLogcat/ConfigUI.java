@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -31,6 +32,7 @@ import java.util.TimerTask;
 
 public class ConfigUI extends Activity {
     AlertDialog.Builder alertDialogBuilder;
+    private static final String TAG = "ConfigUI";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +99,7 @@ public class ConfigUI extends Activity {
                                             }
                                         });
                                         int appCount = infos.size();
+                                        Log.i(TAG, "run: appCount:" + appCount);
                                         final String[] appName = new String[appCount], appList = new String[appCount], appDetails = new String[appCount];
                                         boolean[] cfgShow = new boolean[appCount];
                                         for (int i = 0; i < infos.size(); i++) {

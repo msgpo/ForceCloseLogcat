@@ -10,7 +10,7 @@
 
 日志查看器：”复制“”分享“”删除“：同上，不过点击之后窗口立即消失，需要马上做反馈处理。注意：”环境信息“部分不会存留在文件中。
 
-日志文件：设内置存储为父目录，/Android/data/com.ryuunoakaihitomi.ForceCloseLogcat/FClog。日志文件名格式：时间_packageName.log，请将此交给其开发者。本应用日志文件名格式：linux时间戳_MyCrash.log，请将此交给我。（是的，可能有时候记录崩溃的记录器也会崩溃）
+日志文件：设内置存储为父目录，/Android/data/com.ryuunoakaihitomi.ForceCloseLogcat/files/FClog。日志文件名格式：时间_packageName.log，请将此交给其开发者。本应用日志文件名格式：linux时间戳_MyCrash.log，请将此交给我。（是的，可能有时候记录崩溃的记录器也会崩溃）
 
 注意：在逐条分析为保证尽快跟进到最近的日志，防止延时或提前警报，服务初始化时会清空日志环形缓冲区。因此在用系统工具生成大段系统日志（开发者选项-提交错误报告）的时候，请关闭服务。
 

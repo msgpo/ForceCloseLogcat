@@ -18,6 +18,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
@@ -49,6 +50,7 @@ public class FCLogService extends Service implements Runnable {
     public void onCreate() {
         super.onCreate();
         isRoot = Utils.isRoot();
+        cleanLog();
         //权限检查与试图开启
         Log.i(TAG, "onCreate: READ_LOGS perm granted:" + checkLogPerm() + " isRoot:" + isRoot);
         if (!isRoot && !checkLogPerm()) {
@@ -59,7 +61,6 @@ public class FCLogService extends Service implements Runnable {
         }
         LogOperaBcReceiver.reg();
         startForeground(NOTICE_ID, NoticeBar.serviceStart());
-        cleanLog();
         isAlive = true;
         new Thread(this).start();
         registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
@@ -162,8 +163,18 @@ public class FCLogService extends Service implements Runnable {
                                         String path = LOG_DIR + "/" + time + "_" + FCLogInfoBridge.getFcPackageName() + ".log";
                                         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT)
                                             path = path.replace(':', '.');
+                                        final String writeLogShell = "logcat -v raw -d -s AndroidRuntime:E,DEBUG:F,ActivityManager:E -f \"" + path + "\"";
+                                        Utils.cmd(writeLogShell, Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || Build.VERSION.SDK_INT > Build.VERSION_CODES.O);
+                                        try {
+                                            Thread.sleep(200);
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+                                        long logLength = new File(path).length();
+                                        Log.d(TAG, "run: logLength:" + logLength);
+                                        if (logLength == 0)
+                                            Utils.cmd(writeLogShell, true);
                                         FCLogInfoBridge.setLogPath(path);
-                                        Utils.cmd("logcat -v raw -d -s AndroidRuntime:E,DEBUG:F,ActivityManager:E -f \"" + path + "\"", Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || Build.VERSION.SDK_INT > Build.VERSION_CODES.O);
                                         if (!isQuietModeEnable)
                                             NoticeBar.onFCFounded();
                                         else
