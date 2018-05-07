@@ -10,8 +10,15 @@ import android.view.Gravity;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+
+/**
+ * 其他工具类：非要在两个类中使用的共有方法会在这里
+ */
 
 public class Utils {
     /**
@@ -43,7 +50,14 @@ public class Utils {
         }
     }
 
-    static synchronized void cmd(String command, boolean isRoot) {
+    /**
+     * 执行shell
+     *
+     * @param command 所执行的命令
+     * @param isRoot  是否需要root
+     */
+    static synchronized String cmd(String command, boolean isRoot) {
+        StringBuilder ret = new StringBuilder("");
         try {
             Process p;
             if (isRoot) {
@@ -55,18 +69,21 @@ public class Utils {
             d.writeBytes(command + "\n");
             d.writeBytes("exit\n");
             d.flush();
-            /*OutputStreamWriter osw = new OutputStreamWriter(p.getOutputStream(), "UTF-8");
-            osw.write(command + "\n");
-            osw.write("exit\n");
-            osw.flush();*/
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(p.getInputStream());
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(bufferedInputStream));
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                ret.append(line).append("\n");
+            }
             p.getErrorStream().close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return ret.toString();
     }
 
     /**
-     * 基本模板Toast
+     * 模板Toast
      *
      * @param context  语境
      * @param text     显示文本
@@ -93,6 +110,12 @@ public class Utils {
         }
     }
 
+    /**
+     * 取应用版本名
+     *
+     * @param PackageName 包名
+     * @return 版本名String
+     */
     static String getAppVersionName(String PackageName) {
         String versionName = "";
         try {

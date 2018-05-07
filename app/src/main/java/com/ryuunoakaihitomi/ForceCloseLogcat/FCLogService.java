@@ -24,6 +24,10 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Calendar;
 
+/**
+ * 服务：核心，主要功能实现
+ */
+
 public class FCLogService extends Service implements Runnable {
     @SuppressWarnings("ConstantConditions")
     static final String LOG_DIR = MyApplication.getContext().getExternalFilesDir("FClog").getPath();
@@ -71,7 +75,7 @@ public class FCLogService extends Service implements Runnable {
     public void run() {
         final String GET_LOG_CMD = "logcat -v threadtime" + "\n";
         //头部识别
-        final String LOG_SEPARATOR = "--------- beginning of ";
+        final String LOG_BUFFER_DIVIDER = "--------- beginning of ";
         //Native崩溃头部识别
         final String[] N_SIGNAL = {"DEBUG", "F", "*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***"};
         final String[] J_SIGNAL = {"AndroidRuntime", "E", "FATAL EXCEPTION"};
@@ -107,8 +111,8 @@ public class FCLogService extends Service implements Runnable {
                         Log.d(TAG, "run: Sampling Log... line:\"" + line + "\"");
                         isTickReceived = false;
                     }
-                    final LogObject logObject = new LogObject(line);
-                    if (!line.contains(LOG_SEPARATOR))
+                    if (!line.contains(LOG_BUFFER_DIVIDER)) {
+                        final LogObject logObject = new LogObject(line);
                         if ((J_SIGNAL[0].equals(logObject.getTag())
                                 && J_SIGNAL[1].equals(logObject.getLevel())
                                 && logObject.getRaw().contains(J_SIGNAL[2]))
@@ -120,8 +124,10 @@ public class FCLogService extends Service implements Runnable {
                                 (ANR_SIGNAL[0].equals(logObject.getTag())
                                         && ANR_SIGNAL[1].equals(logObject.getLevel())
                                         && logObject.getRaw().contains(ANR_SIGNAL[2]))) {
+                            final long start = System.currentTimeMillis();
                             Log.d(TAG, "run: CrashLogPrinter: PID:" + logObject.getPID() + " TID:" + logObject.getTID());
                             while (Arrays.asList(new String[]{J_SIGNAL[0], N_SIGNAL[0], ANR_SIGNAL[0]}).contains(
+                                    //又会读取到分隔符
                                     new LogObject(line = bufferedReader.readLine()).getTag())) {
                                 if (line.contains(J_PROC_SIGNAL[0])) {
                                     String pkgNameTmp;
@@ -163,29 +169,26 @@ public class FCLogService extends Service implements Runnable {
                                         String path = LOG_DIR + "/" + time + "_" + FCLogInfoBridge.getFcPackageName() + ".log";
                                         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT)
                                             path = path.replace(':', '.');
-                                        final String writeLogShell = "logcat -v raw -d -s AndroidRuntime:E,DEBUG:F,ActivityManager:E -f \"" + path + "\"";
-                                        Utils.cmd(writeLogShell, Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || Build.VERSION.SDK_INT > Build.VERSION_CODES.O);
-                                        try {
-                                            Thread.sleep(200);
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
-                                        }
+                                        final String writeLogShell = "logcat -v raw -d -s AndroidRuntime:E,DEBUG:F,ActivityManager:E";
+                                        TxtFileIO.W(path, Utils.cmd(writeLogShell, Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || Build.VERSION.SDK_INT > Build.VERSION_CODES.O));
                                         long logLength = new File(path).length();
                                         Log.d(TAG, "run: logLength:" + logLength);
-                                        if (logLength == 0)
-                                            Utils.cmd(writeLogShell, true);
                                         FCLogInfoBridge.setLogPath(path);
                                         if (!isQuietModeEnable)
                                             NoticeBar.onFCFounded();
                                         else
                                             震える();
                                     }
+                                    Log.i(TAG, "run: A Workflow :" + (System.currentTimeMillis() - start) + "ms");
+                                    //不清除日志在短时间发生多次崩溃时将会重复输出，但极不方便调试
                                     cleanLog();
                                 }
                             }).start();
                         }
+                    }
                 }
             }
+            Log.d(TAG, "run: jumped out the loop.");
             if (dataOutputStream != null)
                 dataOutputStream.close();
         } catch (IOException e) {

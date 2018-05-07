@@ -27,7 +27,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * 活动：设置界面
+ * 活动：设置和白名单编辑器界面
  */
 
 public class ConfigUI extends Activity {
@@ -43,7 +43,7 @@ public class ConfigUI extends Activity {
             ConfigMgr.setString(ConfigMgr.Options.WHITE_LIST, new JSONObject().toString());
             ConfigMgr.saveAll();
         }
-        //一级管理
+        //一级管理：设置
         alertDialogBuilder = new AlertDialog.Builder(this, AlertDialog.THEME_DEVICE_DEFAULT_DARK)
                 .setTitle(R.string.settings)
                 .setMultiChoiceItems(new String[]
@@ -78,9 +78,10 @@ public class ConfigUI extends Activity {
                         Utils.simpleToast(ConfigUI.this, getString(R.string.processing_please_wait), false, true);
                         /*  https://github.com/aosp-mirror/platform_frameworks_base/blob/master/services/core/java/com/android/server/notification/NotificationManagerService.java
                         static final int SHORT_DELAY = 2000; // 2 seconds
+                        土司持续时间
                         */
                         //不再设1000,因为枚举速度跟不上会导致土司过早退出
-                        final int TOAST_SHOW_DELAY = 400;
+                        final int TOAST_SHOW_DELAY = 300;
                         new Timer().schedule(new TimerTask() {
                             @Override
                             public void run() {
@@ -90,7 +91,7 @@ public class ConfigUI extends Activity {
                                         final JSONObject appListSaver = new JSONObject();
                                         final PackageManager manager = getPackageManager();
                                         List<PackageInfo> infos = manager.getInstalledPackages(0);
-                                        //根据当前区域按照标签排列
+                                        //根据当前区域按照标签排列。注意：这个的实现让我卡了一下。关键词：Collections.sort，Collator
                                         Collections.sort(infos, new Comparator<PackageInfo>() {
                                             @Override
                                             public int compare(PackageInfo o1, PackageInfo o2) {

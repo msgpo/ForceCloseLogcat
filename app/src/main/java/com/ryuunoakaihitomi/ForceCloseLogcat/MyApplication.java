@@ -28,6 +28,7 @@ public class MyApplication extends Application implements Thread.UncaughtExcepti
         new File(FCLogService.LOG_DIR).mkdirs();
     }
 
+    //Chash监听
     @Override
     public void uncaughtException(Thread t, Throwable e) {
         final int CRASH_UI_FREEZE_DELAY = 1000;

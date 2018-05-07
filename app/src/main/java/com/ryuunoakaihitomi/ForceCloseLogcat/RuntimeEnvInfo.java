@@ -4,6 +4,10 @@ import android.os.Build;
 
 import java.util.Objects;
 
+/**
+ * 环境信息记录
+ */
+
 public class RuntimeEnvInfo {
     public static String get() {
         String infoBody = "";

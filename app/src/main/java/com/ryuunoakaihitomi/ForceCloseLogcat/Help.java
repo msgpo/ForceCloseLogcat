@@ -1,18 +1,22 @@
 package com.ryuunoakaihitomi.ForceCloseLogcat;
 
 import android.app.Activity;
+import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.app.AlertDialog.Builder;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import static android.app.AlertDialog.THEME_DEVICE_DEFAULT_DARK;
+
+/**
+ * 活动：帮助
+ */
 
 public class Help extends Activity {
     private final String DONATE_LINK = "http://ryuunoakaihitomi.info/donate/";

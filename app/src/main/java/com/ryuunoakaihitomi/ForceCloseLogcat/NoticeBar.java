@@ -9,10 +9,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 
 import java.util.Objects;
+
+/**
+ * 通知管理
+ */
 
 public class NoticeBar {
     private static final String TAG = "NoticeBar";
@@ -24,6 +29,14 @@ public class NoticeBar {
             SSchannelName = "ForceCloseLogcat ServiceKeeper",
             FCchannelId = "FClog.ncidf",
             FCchannelName = "ForceCloseLogcat FCCrashReport";
+
+    private static Intent operationBaseIntent(String whichAction) {
+        return new Intent(whichAction)
+                .setData(Uri.parse("custom://" + System.currentTimeMillis()))
+                .putExtra(LogViewer.EXTAG_PATH, FCLogInfoBridge.getLogPath())
+                .putExtra(LogViewer.EXTAG_ENVINFO, RuntimeEnvInfo.get())
+                .putExtra(LogViewer.EXTAG_NOTICE_ID, id);
+    }
 
     public static Notification serviceStart() {
         Notification.Builder builder;
@@ -57,8 +70,9 @@ public class NoticeBar {
             nid = Integer.MAX_VALUE;
         else
             nid = ++id;
-        PendingIntent pendingIntent = PendingIntent.getActivity(c, 0, new Intent(c, LogViewer.class)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+        PendingIntent pendingIntent = PendingIntent.getActivity(c, nid, new Intent(c, LogViewer.class)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS | Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                .setData(Uri.parse("custom://" + System.currentTimeMillis()))
                 .putExtra(LogViewer.EXTAG_PATH, FCLogInfoBridge.getLogPath())
                 .putExtra(LogViewer.EXTAG_ENVINFO, RuntimeEnvInfo.get())
                 .putExtra(LogViewer.EXTAG_NOTICE_ID, nid), PendingIntent.FLAG_UPDATE_CURRENT);
@@ -73,28 +87,20 @@ public class NoticeBar {
                 .setAutoCancel(true)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setPriority(Notification.PRIORITY_MAX);
-        Intent copy = new Intent(LogOperaBcReceiver.EXACT_COPY)
-                .putExtra(LogViewer.EXTAG_PATH, FCLogInfoBridge.getLogPath())
-                .putExtra(LogViewer.EXTAG_ENVINFO, RuntimeEnvInfo.get()),
-                delete = new Intent(LogOperaBcReceiver.EXACT_DELETE)
-                        .putExtra(LogViewer.EXTAG_PATH, FCLogInfoBridge.getLogPath())
-                        .putExtra(LogViewer.EXTAG_NOTICE_ID, id),
-                share = new Intent(LogOperaBcReceiver.EXACT_SHARE)
-                        .putExtra(LogViewer.EXTAG_PATH, FCLogInfoBridge.getLogPath())
-                        .putExtra(LogViewer.EXTAG_ENVINFO, RuntimeEnvInfo.get())
-                        .putExtra(LogViewer.EXTAG_NOTICE_ID, id),
-                slide = new Intent(LogOperaBcReceiver.EXACT_SLIDE)
-                        .putExtra(LogViewer.EXTAG_PATH, FCLogInfoBridge.getLogPath());
+        Intent copy = operationBaseIntent(LogOperaBcReceiver.EXACT_COPY),
+                delete = operationBaseIntent(LogOperaBcReceiver.EXACT_DELETE),
+                share = operationBaseIntent(LogOperaBcReceiver.EXACT_SHARE),
+                slide = operationBaseIntent(LogOperaBcReceiver.EXACT_SLIDE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
             builder.setColor(Color.RED);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH)
-            builder.addAction(new Notification.Action(0, c.getString(R.string.copy), PendingIntent.getBroadcast(c, 0, copy, PendingIntent.FLAG_UPDATE_CURRENT)))
-                    .addAction(new Notification.Action(0, c.getString(R.string.delete), PendingIntent.getBroadcast(c, 0, delete, PendingIntent.FLAG_UPDATE_CURRENT)))
-                    .addAction(new Notification.Action(0, c.getString(R.string.share), PendingIntent.getBroadcast(c, 0, share, PendingIntent.FLAG_UPDATE_CURRENT)));
+            builder.addAction(new Notification.Action(0, c.getString(R.string.copy), PendingIntent.getBroadcast(c, nid, copy, PendingIntent.FLAG_UPDATE_CURRENT)))
+                    .addAction(new Notification.Action(0, c.getString(R.string.delete), PendingIntent.getBroadcast(c, nid, delete, PendingIntent.FLAG_UPDATE_CURRENT)))
+                    .addAction(new Notification.Action(0, c.getString(R.string.share), PendingIntent.getBroadcast(c, nid, share, PendingIntent.FLAG_UPDATE_CURRENT)));
         else
-            builder.addAction(0, c.getString(R.string.delete), PendingIntent.getBroadcast(c, 0, delete, PendingIntent.FLAG_UPDATE_CURRENT))
-                    .addAction(0, c.getString(R.string.copy), PendingIntent.getBroadcast(c, 0, copy, PendingIntent.FLAG_UPDATE_CURRENT))
-                    .addAction(0, c.getString(R.string.share), PendingIntent.getBroadcast(c, 0, share, PendingIntent.FLAG_UPDATE_CURRENT));
+            builder.addAction(0, c.getString(R.string.delete), PendingIntent.getBroadcast(c, nid, delete, PendingIntent.FLAG_UPDATE_CURRENT))
+                    .addAction(0, c.getString(R.string.copy), PendingIntent.getBroadcast(c, nid, copy, PendingIntent.FLAG_UPDATE_CURRENT))
+                    .addAction(0, c.getString(R.string.share), PendingIntent.getBroadcast(c, nid, share, PendingIntent.FLAG_UPDATE_CURRENT));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel notificationChannel = new NotificationChannel(FCchannelId, FCchannelName, NotificationManager.IMPORTANCE_DEFAULT);
             Objects.requireNonNull(c.getSystemService(NotificationManager.class)).createNotificationChannel(notificationChannel);

@@ -15,6 +15,10 @@ import static com.ryuunoakaihitomi.ForceCloseLogcat.LogViewer.EXTAG_ENVINFO;
 import static com.ryuunoakaihitomi.ForceCloseLogcat.LogViewer.EXTAG_NOTICE_ID;
 import static com.ryuunoakaihitomi.ForceCloseLogcat.LogViewer.EXTAG_PATH;
 
+/**
+ * 广播接收器：日志操作
+ */
+
 @SuppressWarnings("WeakerAccess")
 public class LogOperaBcReceiver {
     private static final String TAG = "LogOperaBcReceiver";

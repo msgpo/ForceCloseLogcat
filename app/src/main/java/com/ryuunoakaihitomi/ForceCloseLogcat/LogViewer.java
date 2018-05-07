@@ -10,6 +10,8 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.lang.reflect.Field;
@@ -27,7 +29,8 @@ public class LogViewer extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTheme(android.R.style.Theme_Dialog);
+        final int fullScrFlag = WindowManager.LayoutParams.FLAG_FULLSCREEN;
+        getWindow().setFlags(fullScrFlag, fullScrFlag);
         path = getIntent().getStringExtra(EXTAG_PATH);
         envInfo = getIntent().getStringExtra(EXTAG_ENVINFO);
         String logBody = TxtFileIO.R(path);
@@ -75,6 +78,8 @@ public class LogViewer extends Activity {
                 })
                 .create();
         dialog.show();
+        //https://github.com/aosp-mirror/platform_frameworks_base/blob/master/core/java/com/android/internal/app/AlertController.java
+        //通过反射取得AlertDialog的窗体对象
         try {
             Field mAlert = AlertDialog.class.getDeclaredField("mAlert");
             mAlert.setAccessible(true);
@@ -84,14 +89,23 @@ public class LogViewer extends Activity {
             TextView textView = (TextView) mMessageView.get(mAlertController);
             textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
             textView.setTextColor(Color.GREEN);
+            textView.setTextIsSelectable(true);
+            //以下步骤还可以用使用getButton来取得Button对象这个方法来代替，只不过那个已经使用过了。
+            Field mButtonNeutral = mAlertController.getClass().getDeclaredField("mButtonNeutral");
+            mButtonNeutral.setAccessible(true);
+            Button button = (Button) mButtonNeutral.get(mAlertController);
+            button.setTextColor(Color.RED);
+            button.getPaint().setFakeBoldText(true);
         } catch (IllegalAccessException | NoSuchFieldException e) {
             e.printStackTrace();
         }
     }
 
+    //当不在前台的时候要尽快关闭，为下一次日志记录显示做准备。
     @Override
     protected void onPause() {
         super.onPause();
+        //不必理会因为锁屏所造成的onPause调用
         boolean isScreenOn;
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         assert powerManager != null;
@@ -100,7 +114,10 @@ public class LogViewer extends Activity {
         } else
             isScreenOn = powerManager.isScreenOn();
         Log.i(TAG, "onPause: isScreenOn:" + isScreenOn);
-        if (isScreenOn)
+        if (isScreenOn) {
+            //防止窗体泄露
             dialog.dismiss();
+            finish();
+        }
     }
 }

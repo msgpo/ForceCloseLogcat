@@ -1,5 +1,10 @@
 package com.ryuunoakaihitomi.ForceCloseLogcat;
 
+/**
+ * 封装类：对logcat -v threadtime输出的日志进行的解析
+ * 日志示例："04-30 04:37:25.233  1486  1486 I chatty  : uid=1000 system_server expire 1 line"
+ */
+
 public class LogObject {
     @SuppressWarnings("FieldCanBeLocal")
     private final String
@@ -18,6 +23,9 @@ public class LogObject {
         return logSplit[0];
     }
 
+    /**
+     * @return 时分秒
+     */
     public String getTime() {
         return logSplit[1];
     }
@@ -42,6 +50,9 @@ public class LogObject {
                 : tagRaw;
     }
 
+    /**
+     * @return 取得日志正文
+     */
     public String getRaw() {
         return srcLog.substring(srcLog.indexOf(RAW_SEPARATOR) + RAW_SEPARATOR.length());
     }

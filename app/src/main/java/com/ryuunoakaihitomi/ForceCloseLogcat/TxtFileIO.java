@@ -5,6 +5,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+/**
+ * 对文本文件的操作
+ */
+
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class TxtFileIO {
 
