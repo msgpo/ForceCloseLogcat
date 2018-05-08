@@ -1,6 +1,8 @@
 package com.ryuunoakaihitomi.ForceCloseLogcat;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -15,6 +17,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Objects;
 
 /**
  * 其他工具类：非要在两个类中使用的共有方法会在这里
@@ -129,5 +132,10 @@ public class Utils {
         } catch (Exception ignored) {
         }
         return versionName;
+    }
+
+    static void copyToClipboard(String text) {
+        ((ClipboardManager) Objects.requireNonNull(MyApplication.getContext().getSystemService(Context.CLIPBOARD_SERVICE)))
+                .setPrimaryClip(ClipData.newPlainText(null, text));
     }
 }

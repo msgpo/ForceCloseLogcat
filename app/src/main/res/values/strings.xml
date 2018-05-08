@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">应用崩溃日志记录器</string>
     <string name="service_name">日志读取服务</string>
-    <string name="running">启动中…</string>
+    <string name="running">运行中…</string>
     <string name="fcnoti_subtext">来自%s(%s)</string>
     <string name="fc_found">已捕获FC</string>
     <string name="share">分享</string>
@@ -35,4 +35,5 @@
     <string name="help_toast">应用版本：%s \n帮助更新日期：%s</string>
     <string name="help_update_time">20180507</string>
     <string name="service_running">日志监听服务开始运行</string>
+    <string name="copy_adb_cmd">复制ADB命令</string>
 </resources>

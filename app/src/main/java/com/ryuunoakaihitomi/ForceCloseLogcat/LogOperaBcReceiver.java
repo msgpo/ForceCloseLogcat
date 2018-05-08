@@ -2,8 +2,6 @@ package com.ryuunoakaihitomi.ForceCloseLogcat;
 
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -36,9 +34,8 @@ public class LogOperaBcReceiver {
                 public void onReceive(Context context, Intent intent) {
                     logPath = intent.getStringExtra(EXTAG_PATH);
                     envInfo = intent.getStringExtra(EXTAG_ENVINFO);
-                    ((ClipboardManager) Objects.requireNonNull(MyApplication.getContext().getSystemService(Context.CLIPBOARD_SERVICE)))
-                            .setPrimaryClip(ClipData.newPlainText(null, packageLog()));
                     Utils.simpleToast(MyApplication.getContext(), MyApplication.getContext().getString(R.string.copied_info), false, false);
+                    Utils.copyToClipboard(packageLog());
                 }
             },
             new BroadcastReceiver() {

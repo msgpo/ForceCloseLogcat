@@ -79,10 +79,10 @@ public class Help extends Activity {
                 }
             });
         } else
-            builder.setNeutralButton(" ", new OnClickListener() {
+            builder.setNeutralButton(R.string.copy_adb_cmd, new OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    openURL("https://github.com/Alcatraz323/fclogcat/");
+                    Utils.copyToClipboard("adb shell pm grant com.ryuunoakaihitomi.ForceCloseLogcat android.permission.READ_LOGS");
                     finish();
                 }
             });
