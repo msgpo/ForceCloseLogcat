@@ -56,20 +56,20 @@ public class FCLogService extends Service implements Runnable {
         isRoot = Utils.isRoot();
         isAlive = true;
         cleanLog();
-        LogOperaBcReceiver.reg();
         //权限检查与试图开启
         Log.i(TAG, "onCreate: READ_LOGS perm granted:" + checkLogPerm() + " isRoot:" + isRoot);
         if (!isRoot && !checkLogPerm()) {
             onPermissionDenied();
-            return;
         }
         if (isRoot && !checkLogPerm()) {
             Utils.cmd("pm grant com.ryuunoakaihitomi.ForceCloseLogcat android.permission.READ_LOGS", true);
         }
         startForeground(NOTICE_ID, NoticeBar.serviceStart());
+        LogOperaBcReceiver.reg();
         new Thread(this).start();
         registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
-        Utils.simpleToast(this, getString(R.string.service_running), false, false);
+        if (isAlive)
+            Utils.simpleToast(this, getString(R.string.service_running), false, false);
     }
 
     @Override
