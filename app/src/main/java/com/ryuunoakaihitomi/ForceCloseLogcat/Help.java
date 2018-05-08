@@ -74,7 +74,7 @@ public class Help extends Activity {
             builder.setNeutralButton(R.string.start_service, new OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    startService(new Intent(MyApplication.getContext(), FCLogService.class));
+                    startService(new Intent(Help.this, FCLogService.class));
                     finish();
                 }
             });

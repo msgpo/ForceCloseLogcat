@@ -12,6 +12,8 @@ public class FCLogInfoBridge {
             fcPackageName,
             fcPID,
             fcTime;
+    //捕捉日志样本
+    public static String log;
 
     public static String getLogPath() {
         Log.v(TAG, "getLogPath: " + logPath);
@@ -19,7 +21,8 @@ public class FCLogInfoBridge {
     }
 
     public static void setLogPath(String logPath) {
-        Log.v(TAG, "setLogPath: " + logPath);
+        if (!logPath.equals(FCLogInfoBridge.logPath))
+            Log.v(TAG, "setLogPath: " + logPath);
         FCLogInfoBridge.logPath = logPath;
     }
 
@@ -29,7 +32,8 @@ public class FCLogInfoBridge {
     }
 
     public static void setFcPackageName(String fcPackageName) {
-        Log.v(TAG, "setFcPackageName: " + fcPackageName);
+        if (!fcPackageName.equals(FCLogInfoBridge.fcPackageName))
+            Log.v(TAG, "setFcPackageName: " + fcPackageName);
         FCLogInfoBridge.fcPackageName = fcPackageName;
     }
 
@@ -39,7 +43,8 @@ public class FCLogInfoBridge {
     }
 
     public static void setFcPID(String fcPID) {
-        Log.v(TAG, "setFcPID: " + fcPID);
+        if (!fcPID.equals(FCLogInfoBridge.fcPID))
+            Log.v(TAG, "setFcPID: " + fcPID);
         FCLogInfoBridge.fcPID = fcPID;
     }
 
@@ -49,7 +54,8 @@ public class FCLogInfoBridge {
     }
 
     public static void setFcTime(String fcTime) {
-        Log.v(TAG, "setFcTime: " + fcTime);
+        if (!fcTime.equals(FCLogInfoBridge.fcTime))
+            Log.v(TAG, "setFcTime: " + fcTime);
         FCLogInfoBridge.fcTime = fcTime;
     }
 }

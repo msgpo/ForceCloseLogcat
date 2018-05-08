@@ -134,6 +134,11 @@ public class Utils {
         return versionName;
     }
 
+    /**
+     * 复制到剪贴板
+     *
+     * @param text 要复制的文本
+     */
     static void copyToClipboard(String text) {
         ((ClipboardManager) Objects.requireNonNull(MyApplication.getContext().getSystemService(Context.CLIPBOARD_SERVICE)))
                 .setPrimaryClip(ClipData.newPlainText(null, text));

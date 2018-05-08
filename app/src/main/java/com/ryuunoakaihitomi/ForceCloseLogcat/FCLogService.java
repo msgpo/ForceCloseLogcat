@@ -88,14 +88,10 @@ public class FCLogService extends Service implements Runnable {
         final String[] J_PROC_SIGNAL = {"Process: ", ", PID: "};
         //日志示例："    pid: 9645, tid: 9645, name: oid.development  >>> com.android.development <<<"
         final String[] N_PROC_SIGNAL = {">>> ", " <<<", ": pid: ", ", tid:"};
+        final String J_SYS_SIGNAL = "*** " + J_SIGNAL[2] + " IN SYSTEM PROCESS";
         Process process = null;
         DataOutputStream dataOutputStream = null;
-        /*
-         pm grant, revoke: these commands either grant or revoke permissions
-         to apps. The permissions must be declared as used in the app's
-         manifest, be runtime permissions (protection level dangerous
-         and the app targeting SDK greater than Lollipop MR1.
-         */
+        //从pm的返回值可以看出在22中可以pm grant授权，但实测21也可以。
         try {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                 process = Runtime.getRuntime().exec("su");
@@ -109,26 +105,31 @@ public class FCLogService extends Service implements Runnable {
             while (isAlive) {
                 while ((line = bufferedReader.readLine()) != null) {
                     if (isTickReceived) {
-                        Log.d(TAG, "run: Sampling Log... line:\"" + line + "\"");
+                        Log.d(TAG, "run: An Alive Signal");
                         isTickReceived = false;
                     }
                     if (!line.contains(LOG_BUFFER_DIVIDER)) {
-                        final LogObject logObject = new LogObject(line);
-                        if ((J_SIGNAL[0].equals(logObject.getTag())
-                                && J_SIGNAL[1].equals(logObject.getLevel())
-                                && logObject.getRaw().contains(J_SIGNAL[2]))
+                        FCLogInfoBridge.log = line;
+                        final LogObject headerJudge = new LogObject(line);
+                        if ((J_SIGNAL[0].equals(headerJudge.getTag())
+                                && J_SIGNAL[1].equals(headerJudge.getLevel())
+                                && headerJudge.getRaw().contains(J_SIGNAL[2]))
                                 ||
-                                (N_SIGNAL[0].equals(logObject.getTag())
-                                        && N_SIGNAL[1].equals(logObject.getLevel())
-                                        && N_SIGNAL[2].equals(logObject.getRaw()))
+                                (N_SIGNAL[0].equals(headerJudge.getTag())
+                                        && N_SIGNAL[1].equals(headerJudge.getLevel())
+                                        && N_SIGNAL[2].equals(headerJudge.getRaw()))
                                 ||
-                                (ANR_SIGNAL[0].equals(logObject.getTag())
-                                        && ANR_SIGNAL[1].equals(logObject.getLevel())
-                                        && logObject.getRaw().contains(ANR_SIGNAL[2]))) {
+                                (ANR_SIGNAL[0].equals(headerJudge.getTag())
+                                        && ANR_SIGNAL[1].equals(headerJudge.getLevel())
+                                        && headerJudge.getRaw().contains(ANR_SIGNAL[2]))) {
+                            Log.d(TAG, "run: CrashLogPrinter: PID:" + headerJudge.getPID() + " TID:" + headerJudge.getTID());
                             final long start = System.currentTimeMillis();
-                            Log.d(TAG, "run: CrashLogPrinter: PID:" + logObject.getPID() + " TID:" + logObject.getTID());
+                            if (headerJudge.getRaw().contains(J_SYS_SIGNAL)) {
+                                //对应的标签为"Android 系统"
+                                FCLogInfoBridge.setFcPackageName("android");
+                                FCLogInfoBridge.setFcPID("i");
+                            }
                             while (Arrays.asList(new String[]{J_SIGNAL[0], N_SIGNAL[0], ANR_SIGNAL[0]}).contains(
-                                    //可能又会读取到分隔符
                                     new LogObject(line = bufferedReader.readLine()).getTag())) {
                                 if (line.contains(J_PROC_SIGNAL[0])) {
                                     String pkgNameTmp;
@@ -164,8 +165,8 @@ public class FCLogService extends Service implements Runnable {
                                     Log.i(TAG, "run: isAppInWhiteList:" + isAppInWhiteList + " isWhiteListAvailable:" + isWhiteListAvailable + " isQuietModeEnable:" + isQuietModeEnable);
                                     if (!isWhiteListAvailable || !isAppInWhiteList) {
                                         String time = Calendar.getInstance().get(Calendar.YEAR)
-                                                + "-" + logObject.getDate()
-                                                + " " + logObject.getTime();
+                                                + "-" + headerJudge.getDate()
+                                                + " " + headerJudge.getTime();
                                         FCLogInfoBridge.setFcTime(time);
                                         String path = LOG_DIR + "/" + time + "_" + FCLogInfoBridge.getFcPackageName() + ".log";
                                         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT)
@@ -222,9 +223,9 @@ public class FCLogService extends Service implements Runnable {
     boolean checkLogPerm() {
         int intRet;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            intRet = MyApplication.getContext().checkSelfPermission(Manifest.permission.READ_LOGS);
+            intRet = checkSelfPermission(Manifest.permission.READ_LOGS);
         else
-            intRet = MyApplication.getContext().checkPermission(Manifest.permission.READ_LOGS, android.os.Process.myPid(), android.os.Process.myUid());
+            intRet = checkPermission(Manifest.permission.READ_LOGS, android.os.Process.myPid(), android.os.Process.myUid());
         return intRet == PackageManager.PERMISSION_GRANTED;
     }
 

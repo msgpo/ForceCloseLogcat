@@ -12,10 +12,12 @@ import java.io.IOException;
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class TxtFileIO {
 
+    //删
     static void D(String path) {
         DKernel(new File(path));
     }
 
+    //写
     static void W(String fileName, String txtBody) {
         try {
             File file = new File(fileName);
@@ -32,6 +34,7 @@ public class TxtFileIO {
         }
     }
 
+    //读
     static String R(String fileName) {
         String res = "";
         try {
@@ -48,6 +51,7 @@ public class TxtFileIO {
         return res;
     }
 
+    //删(内部)
     private static void DKernel(File f) {
         if (f.isFile()) {
             f.delete();
