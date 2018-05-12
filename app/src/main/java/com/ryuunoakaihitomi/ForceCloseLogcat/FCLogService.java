@@ -149,43 +149,45 @@ public class FCLogService extends Service implements Runnable {
                                             FCLogInfoBridge.setFcPackageName(new LogObject(line).getRaw().substring(new LogObject(line).getRaw().indexOf(ANR_PROC_SIGNAL[0]) + ANR_PROC_SIGNAL[0].length()).split(" +")[0]);
                                 }
                             }
-                            Log.v(TAG, "run: new Thread");
-                            new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    boolean
-                                            isAppInWhiteList = false,
-                                            isWhiteListAvailable = ConfigMgr.getBoolean(ConfigMgr.Options.WHITE_LIST_SWITCH),
-                                            isQuietModeEnable = ConfigMgr.getBoolean(ConfigMgr.Options.QUIET_MODE);
-                                    try {
-                                        isAppInWhiteList = new JSONObject(ConfigMgr.getString(ConfigMgr.Options.WHITE_LIST)).optBoolean(FCLogInfoBridge.getFcPackageName());
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
+                            if (!this.getClass().getPackage().getName().equals(FCLogInfoBridge.getFcPackageName())) {
+                                Log.v(TAG, "run: new Thread");
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        boolean
+                                                isAppInWhiteList = false,
+                                                isWhiteListAvailable = ConfigMgr.getBoolean(ConfigMgr.Options.WHITE_LIST_SWITCH),
+                                                isQuietModeEnable = ConfigMgr.getBoolean(ConfigMgr.Options.QUIET_MODE);
+                                        try {
+                                            isAppInWhiteList = new JSONObject(ConfigMgr.getString(ConfigMgr.Options.WHITE_LIST)).optBoolean(FCLogInfoBridge.getFcPackageName());
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                        Log.i(TAG, "run: isAppInWhiteList:" + isAppInWhiteList + " isWhiteListAvailable:" + isWhiteListAvailable + " isQuietModeEnable:" + isQuietModeEnable);
+                                        if (!isWhiteListAvailable || !isAppInWhiteList) {
+                                            String time = Calendar.getInstance().get(Calendar.YEAR)
+                                                    + "-" + headerJudge.getDate()
+                                                    + " " + headerJudge.getTime();
+                                            FCLogInfoBridge.setFcTime(time);
+                                            String path = LOG_DIR + "/" + time + "_" + FCLogInfoBridge.getFcPackageName() + ".log";
+                                            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT)
+                                                path = path.replace(':', '.');
+                                            final String LOG_FILTER_OUTPUT_CMD = "logcat -v raw -d -s AndroidRuntime:E,DEBUG:F,ActivityManager:E";
+                                            TxtFileIO.W(path, Utils.cmd(LOG_FILTER_OUTPUT_CMD, Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || Build.VERSION.SDK_INT > Build.VERSION_CODES.O));
+                                            long logLength = new File(path).length();
+                                            Log.d(TAG, "run: logLength:" + logLength);
+                                            FCLogInfoBridge.setLogPath(path);
+                                            if (!isQuietModeEnable)
+                                                NoticeBar.onFCFounded();
+                                            else
+                                                震える();
+                                        }
+                                        Log.i(TAG, "run: A Workflow in " + (System.currentTimeMillis() - start) + "ms");
+                                        //不清除日志在短时间发生多次崩溃时将会重复输出，但极不方便调试
+                                        cleanLog();
                                     }
-                                    Log.i(TAG, "run: isAppInWhiteList:" + isAppInWhiteList + " isWhiteListAvailable:" + isWhiteListAvailable + " isQuietModeEnable:" + isQuietModeEnable);
-                                    if (!isWhiteListAvailable || !isAppInWhiteList) {
-                                        String time = Calendar.getInstance().get(Calendar.YEAR)
-                                                + "-" + headerJudge.getDate()
-                                                + " " + headerJudge.getTime();
-                                        FCLogInfoBridge.setFcTime(time);
-                                        String path = LOG_DIR + "/" + time + "_" + FCLogInfoBridge.getFcPackageName() + ".log";
-                                        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT)
-                                            path = path.replace(':', '.');
-                                        final String LOG_FILTER_OUTPUT_CMD = "logcat -v raw -d -s AndroidRuntime:E,DEBUG:F,ActivityManager:E";
-                                        TxtFileIO.W(path, Utils.cmd(LOG_FILTER_OUTPUT_CMD, Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || Build.VERSION.SDK_INT > Build.VERSION_CODES.O));
-                                        long logLength = new File(path).length();
-                                        Log.d(TAG, "run: logLength:" + logLength);
-                                        FCLogInfoBridge.setLogPath(path);
-                                        if (!isQuietModeEnable)
-                                            NoticeBar.onFCFounded();
-                                        else
-                                            震える();
-                                    }
-                                    Log.i(TAG, "run: A Workflow in " + (System.currentTimeMillis() - start) + "ms");
-                                    //不清除日志在短时间发生多次崩溃时将会重复输出，但极不方便调试
-                                    cleanLog();
-                                }
-                            }).start();
+                                }).start();
+                            }
                         }
                     }
                 }
@@ -233,7 +235,7 @@ public class FCLogService extends Service implements Runnable {
     void 震える() {
         Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         if (vibrator.hasVibrator()) {
-            final int DIT = 20, DAH = DIT * 3;
+            final int DIT = 30, DAH = DIT * 3;
             //..-. -.-.
             vibrator.vibrate(new long[]{0, DIT/*1*/, DIT, DIT/*2*/, DIT, DAH/*3*/, DIT, DIT/*4*/, DAH/* */, DAH/*5*/, DIT, DIT/*6*/, DIT, DAH/*7*/, DIT, DIT/*8*/}, -1);
         } else
