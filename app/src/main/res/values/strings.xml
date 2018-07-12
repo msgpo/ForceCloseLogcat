@@ -36,4 +36,5 @@
     <string name="help_update_time">20180712</string>
     <string name="service_running">日志监听服务开始运行</string>
     <string name="copy_adb_cmd">复制ADB命令</string>
+    <string name="need_wes_perm_notice">在部分系统中可能需要存储权限才能保存日志</string>
 </resources>
