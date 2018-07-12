@@ -3,8 +3,10 @@
 ![icon](./app/src/main/res/mipmap/ic_launcher.png)
 
 > 图标来源：
-https://play.google.com/store/apps/details?id=com.phobos.system.crashyclicker
-https://play.google.com/store/apps/details?id=org.rojekti.clipper
+>
+> https://play.google.com/store/apps/details?id=com.phobos.system.crashyclicker
+>
+> https://play.google.com/store/apps/details?id=org.rojekti.clipper
 
 
 

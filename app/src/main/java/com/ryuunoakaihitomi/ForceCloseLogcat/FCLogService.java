@@ -212,6 +212,7 @@ public class FCLogService extends Service implements Runnable {
         super.onDestroy();
     }
 
+    //清除日志
     void cleanLog() {
         final String CLEAN_LOG_CMD = "logcat -c";
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || Build.VERSION.SDK_INT > Build.VERSION_CODES.O)
@@ -222,6 +223,7 @@ public class FCLogService extends Service implements Runnable {
             Utils.cmd(CLEAN_LOG_CMD, true);
     }
 
+    //检查日志读取权限
     boolean checkLogPerm() {
         int intRet;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)

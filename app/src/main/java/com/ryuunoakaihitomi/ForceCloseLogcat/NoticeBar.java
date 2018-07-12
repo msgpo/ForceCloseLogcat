@@ -60,7 +60,6 @@ public class NoticeBar {
         return builder.build();
     }
 
-    //@TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static void onFCFounded() {
         Notification.BigTextStyle bigTextStyle = new Notification.BigTextStyle();
         bigTextStyle.bigText(TxtFileIO.R(FCLogInfoBridge.getLogPath()));

@@ -19,6 +19,8 @@ public class ConfigMgr {
         editor = sharedPreferences.edit();
     }
 
+    //boolean值IO
+
     static void setBoolean(String key, boolean val) {
         Log.d(TAG, "setBoolean: key:" + key + " val:" + val);
         editor.putBoolean(key, val);
