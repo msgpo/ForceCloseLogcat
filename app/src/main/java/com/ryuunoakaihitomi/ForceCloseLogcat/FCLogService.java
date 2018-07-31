@@ -66,7 +66,10 @@ public class FCLogService extends Service implements Runnable {
         }
         startForeground(NOTICE_ID, NoticeBar.serviceStart());
         LogOperaBcReceiver.reg();
-        new Thread(this).start();
+        Thread thread = new Thread(this);
+        //增加优先级方法1
+        thread.setPriority(Thread.MAX_PRIORITY);
+        thread.start();
         registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
         if (isAlive)
             Utils.simpleToast(this, getString(R.string.service_running), false, false);
@@ -74,6 +77,9 @@ public class FCLogService extends Service implements Runnable {
 
     @Override
     public void run() {
+        //增加优先级方法2
+        //priority	int: A Linux priority level, from -20 for highest scheduling priority to 19 for lowest scheduling priority.
+        android.os.Process.setThreadPriority(-20);
         final String GET_LOG_CMD = "logcat -v threadtime" + "\n";
         //头部识别
         final String LOG_BUFFER_DIVIDER = "--------- beginning of ";
@@ -105,8 +111,10 @@ public class FCLogService extends Service implements Runnable {
             while (isAlive) {
                 while ((line = bufferedReader.readLine()) != null) {
                     if (isTickReceived) {
-                        Log.d(TAG, "run: An Alive Signal");
+                        Log.d(TAG, "run: An Alive Signal. line=\"" + line + "\"");
                         isTickReceived = false;
+                        //礼让暗示
+                        Thread.yield();
                     }
                     if (!line.contains(LOG_BUFFER_DIVIDER)) {
                         FCLogInfoBridge.log = line;

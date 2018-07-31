@@ -12,7 +12,7 @@ import java.io.File;
 public class MyApplication extends Application implements Thread.UncaughtExceptionHandler {
     private static final String TAG = "MyApplication";
     @SuppressLint("StaticFieldLeak")
-    static Context context;
+    private static Context context;
 
     public static Context getContext() {
         return context;
