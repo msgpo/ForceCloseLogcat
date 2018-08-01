@@ -138,6 +138,7 @@ public class ConfigUI extends Activity {
                                                         ConfigMgr.setString(ConfigMgr.Options.WHITE_LIST, appListSaver.toString());
                                                         ConfigMgr.saveAll();
                                                         Utils.simpleToast(ConfigUI.this, getString(R.string.saved), false, false);
+                                                        finish();
                                                     }
                                                 })
                                                 .setOnCancelListener(new DialogInterface.OnCancelListener() {
@@ -179,12 +180,14 @@ public class ConfigUI extends Activity {
                     public void onClick(DialogInterface dialog, int which) {
                         ConfigMgr.saveAll();
                         Utils.simpleToast(ConfigUI.this, getString(R.string.saved), false, false);
+                        finish();
                     }
                 })
                 .setNegativeButton(R.string.help, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         startActivity(new Intent(ConfigUI.this, Help.class));
+                        finish();
                     }
                 })
                 .setOnCancelListener(new DialogInterface.OnCancelListener() {
