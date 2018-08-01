@@ -33,6 +33,7 @@ import java.util.TimerTask;
 public class ConfigUI extends Activity {
     AlertDialog.Builder alertDialogBuilder;
     private static final String TAG = "ConfigUI";
+    private AlertDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,13 +138,18 @@ public class ConfigUI extends Activity {
                                                         ConfigMgr.setString(ConfigMgr.Options.WHITE_LIST, appListSaver.toString());
                                                         ConfigMgr.saveAll();
                                                         Utils.simpleToast(ConfigUI.this, getString(R.string.saved), false, false);
-                                                        exitAndPreventWindowLeaked(dialog);
                                                     }
                                                 })
                                                 .setOnCancelListener(new DialogInterface.OnCancelListener() {
                                                     @Override
                                                     public void onCancel(DialogInterface dialog) {
-                                                        recreate();
+                                                        //'0' means "put on end of execution queue"
+                                                        new Handler().postDelayed(new Runnable() {
+                                                            @Override
+                                                            public void run() {
+                                                                recreate();
+                                                            }
+                                                        }, 0);
                                                     }
                                                 });
                                         final AlertDialog mainDialogCreate = alertDialogBuilder.create();
@@ -173,24 +179,22 @@ public class ConfigUI extends Activity {
                     public void onClick(DialogInterface dialog, int which) {
                         ConfigMgr.saveAll();
                         Utils.simpleToast(ConfigUI.this, getString(R.string.saved), false, false);
-                        exitAndPreventWindowLeaked(dialog);
                     }
                 })
                 .setNegativeButton(R.string.help, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        exitAndPreventWindowLeaked(dialog);
                         startActivity(new Intent(ConfigUI.this, Help.class));
                     }
                 })
                 .setOnCancelListener(new DialogInterface.OnCancelListener() {
                     @Override
                     public void onCancel(DialogInterface dialog) {
-                        exitAndPreventWindowLeaked(dialog);
+                        finish();
                     }
                 });
         //调试：My Crash
-        AlertDialog dialog = alertDialogBuilder.create();
+        dialog = alertDialogBuilder.create();
         dialog.show();
         dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -201,8 +205,10 @@ public class ConfigUI extends Activity {
     }
 
     //防止窗体泄露
-    void exitAndPreventWindowLeaked(DialogInterface dialog) {
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
         dialog.dismiss();
-        finish();
+        dialog = null;
     }
 }

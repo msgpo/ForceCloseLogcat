@@ -36,7 +36,9 @@
             android:name=".ConfigUI"
             android:excludeFromRecents="true" />
 
-        <service android:name=".FCLogService" />
+        <service
+            android:name=".FCLogService"
+            android:exported="true" />
 
         <receiver android:name=".BootReceiver">
             <intent-filter>

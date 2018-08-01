@@ -94,6 +94,13 @@ public class FCLogService extends Service implements Runnable {
         final String[] J_PROC_SIGNAL = {"Process: ", ", PID: "};
         //日志示例："    pid: 9645, tid: 9645, name: oid.development  >>> com.android.development <<<"
         final String[] N_PROC_SIGNAL = {">>> ", " <<<", ": pid: ", ", tid:"};
+        /*
+        Lollipop会跳过native崩溃日志输出
+        A/libc: Fatal signal 5 (SIGTRAP), code 1 in tid 5055 (.crashgenerator)
+        I/libc: Suppressing debuggerd output because prctl(PR_GET_DUMPABLE)==0
+
+        A/libc: Fatal signal 4 (SIGILL), code 1, fault addr 0xb3849740 in tid 11183 (.crashgenerator)
+        */
         final String J_SYS_SIGNAL = "*** " + J_SIGNAL[2] + " IN SYSTEM PROCESS";
         Process process = null;
         DataOutputStream dataOutputStream = null;
@@ -124,13 +131,17 @@ public class FCLogService extends Service implements Runnable {
                                 && headerJudge.getRaw().contains(J_SIGNAL[2]))
                                 ||
                                 (N_SIGNAL[0].equals(headerJudge.getTag())
-                                        && N_SIGNAL[1].equals(headerJudge.getLevel())
+                                        //Android 4.4发现是I等级
+                                        && (N_SIGNAL[1].equals(headerJudge.getLevel()) || "I".equals(headerJudge.getLevel()))
                                         && N_SIGNAL[2].equals(headerJudge.getRaw()))
                                 ||
                                 (ANR_SIGNAL[0].equals(headerJudge.getTag())
                                         && ANR_SIGNAL[1].equals(headerJudge.getLevel())
                                         && headerJudge.getRaw().contains(ANR_SIGNAL[2]))) {
                             Log.d(TAG, "run: CrashLogPrinter: PID:" + headerJudge.getPID() + " TID:" + headerJudge.getTID());
+                            //给低性能设备的crash日志输出进行礼让（测试）
+                            Thread.yield();
+                            Log.d(TAG, "run: yield()");
                             final long start = System.currentTimeMillis();
                             if (headerJudge.getRaw().contains(J_SYS_SIGNAL)) {
                                 //对应的标签为"Android 系统"
@@ -185,7 +196,8 @@ public class FCLogService extends Service implements Runnable {
                                             if ((J_SIGNAL[0].equals(headerJudge.getTag())))
                                                 logFilter = "AndroidRuntime:E";
                                             else if ((N_SIGNAL[0].equals(headerJudge.getTag())))
-                                                logFilter = "DEBUG:F";
+                                                //未确定DEBUG的Level变成F是在什么API Level
+                                                logFilter = "DEBUG:F,DEBUG:I";
                                             else
                                                 logFilter = "ActivityManager:E";
                                             Log.i(TAG, "run: set logcat filter:" + logFilter);

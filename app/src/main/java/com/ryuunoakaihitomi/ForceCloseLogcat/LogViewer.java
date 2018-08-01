@@ -11,6 +11,8 @@ import android.os.PowerManager;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.WindowManager;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -41,9 +43,23 @@ public class LogViewer extends Activity {
                 envInfo + "\n" +
                 separator + getString(R.string.log_body) + "\n" +
                 logBody;
-        dialog = new AlertDialog.Builder(LogViewer.this, AlertDialog.THEME_DEVICE_DEFAULT_DARK)
-                .setTitle(R.string.log_reader)
-                .setMessage(message)
+        AlertDialog.Builder builder = new AlertDialog.Builder(LogViewer.this, AlertDialog.THEME_DEVICE_DEFAULT_DARK)
+                .setTitle(R.string.log_reader);
+        //Android P
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O_MR1) {
+            WebView webView = new WebView(this);
+            WebSettings webSettings = webView.getSettings();
+            webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+            webSettings.setLoadWithOverviewMode(true);
+            //缩放
+            webSettings.setBuiltInZoomControls(true);
+            webSettings.setDisplayZoomControls(false);
+            //尽可能模拟原先的显示样式
+            webView.loadData("<body style=background-color:black><p style=font-size:8pt;color:#0F0;word-break:keep-all>" + message.replace("\n", "<br>") + "</p></body>", null, null);
+            builder.setView(webView);
+        } else
+            builder.setMessage(message);
+        builder
                 .setPositiveButton(R.string.share, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -75,29 +91,37 @@ public class LogViewer extends Activity {
                     public void onCancel(DialogInterface dialog) {
                         finish();
                     }
-                })
-                .create();
+                });
+        dialog = builder.create();
         dialog.show();
         //https://github.com/aosp-mirror/platform_frameworks_base/blob/master/core/java/com/android/internal/app/AlertController.java
         //通过反射取得AlertDialog的窗体对象
-        try {
-            Field mAlert = AlertDialog.class.getDeclaredField("mAlert");
-            mAlert.setAccessible(true);
-            Object mAlertController = mAlert.get(dialog);
-            Field mMessageView = mAlertController.getClass().getDeclaredField("mMessageView");
-            mMessageView.setAccessible(true);
-            TextView textView = (TextView) mMessageView.get(mAlertController);
-            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
-            textView.setTextColor(Color.GREEN);
-            textView.setTextIsSelectable(true);
-            //以下步骤还可以用使用getButton来取得Button对象这个方法来代替，只不过那个已经使用过了。
-            Field mButtonNeutral = mAlertController.getClass().getDeclaredField("mButtonNeutral");
-            mButtonNeutral.setAccessible(true);
-            Button button = (Button) mButtonNeutral.get(mAlertController);
+        //Android P已禁用此法
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
+            try {
+                Field mAlert = AlertDialog.class.getDeclaredField("mAlert");
+                mAlert.setAccessible(true);
+                Object mAlertController = mAlert.get(dialog);
+                Field mMessageView = mAlertController.getClass().getDeclaredField("mMessageView");
+                mMessageView.setAccessible(true);
+                TextView textView = (TextView) mMessageView.get(mAlertController);
+                //12sp
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+                textView.setTextColor(Color.GREEN);
+                textView.setTextIsSelectable(true);
+                //以下步骤还可以用使用getButton来取得Button对象这个方法来代替，只不过那个已经使用过了。
+                Field mButtonNeutral = mAlertController.getClass().getDeclaredField("mButtonNeutral");
+                mButtonNeutral.setAccessible(true);
+                Button button = (Button) mButtonNeutral.get(mAlertController);
+                button.setTextColor(Color.RED);
+                button.getPaint().setFakeBoldText(true);
+            } catch (IllegalAccessException | NoSuchFieldException e) {
+                e.printStackTrace();
+            }
+        else {
+            Button button = dialog.getButton(DialogInterface.BUTTON_NEUTRAL);
             button.setTextColor(Color.RED);
             button.getPaint().setFakeBoldText(true);
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-            e.printStackTrace();
         }
     }
 
@@ -117,6 +141,7 @@ public class LogViewer extends Activity {
         if (isScreenOn) {
             //防止窗体泄露
             dialog.dismiss();
+            dialog = null;
             finish();
         }
     }

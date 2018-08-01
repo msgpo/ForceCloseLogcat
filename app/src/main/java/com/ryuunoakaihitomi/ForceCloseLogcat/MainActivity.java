@@ -19,10 +19,12 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (ConfigMgr.getBoolean(ConfigMgr.Options.FIRST_RUN)) {
-            //noinspection ConstantConditions
-            if (checkPermission(WRITE_EXTERNAL_STORAGE, Process.myPid(), Process.myUid()) != PackageManager.PERMISSION_GRANTED
-                    || ((AppOpsManager) getSystemService(APP_OPS_SERVICE)).checkOpNoThrow(AppOpsManager.OPSTR_WRITE_EXTERNAL_STORAGE, Process.myUid(), getPackageName()) != AppOpsManager.MODE_ALLOWED)
-                Utils.simpleToast(getApplicationContext(), getString(R.string.need_wes_perm_notice), false, true);
+            //java.lang.IllegalArgumentException: Unknown operation string: android:write_external_storage
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                //noinspection ConstantConditions
+                if (checkPermission(WRITE_EXTERNAL_STORAGE, Process.myPid(), Process.myUid()) != PackageManager.PERMISSION_GRANTED
+                        || ((AppOpsManager) getSystemService(APP_OPS_SERVICE)).checkOpNoThrow(AppOpsManager.OPSTR_WRITE_EXTERNAL_STORAGE, Process.myUid(), getPackageName()) != AppOpsManager.MODE_ALLOWED)
+                    Utils.simpleToast(getApplicationContext(), getString(R.string.need_wes_perm_notice), false, true);
             startActivity(new Intent(this, ConfigUI.class));
             startService(new Intent(this, FCLogService.class));
             finish();

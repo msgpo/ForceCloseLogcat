@@ -73,6 +73,11 @@ public class Utils {
             d.writeBytes(command + "\n");
             d.writeBytes("exit\n");
             d.flush();
+            try {
+                System.out.println("cmd: exitValue=" + p.waitFor());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             BufferedInputStream bufferedInputStream = new BufferedInputStream(p.getInputStream());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(bufferedInputStream));
             String line;
