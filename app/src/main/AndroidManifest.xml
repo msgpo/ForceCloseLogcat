@@ -21,6 +21,7 @@
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
         <activity
             android:name=".MainActivity"
+            android:excludeFromRecents="true"
             android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -31,7 +32,9 @@
         <activity
             android:name=".LogViewer"
             android:excludeFromRecents="true" />
-        <activity android:name=".ConfigUI" />
+        <activity
+            android:name=".ConfigUI"
+            android:excludeFromRecents="true" />
 
         <service android:name=".FCLogService" />
 

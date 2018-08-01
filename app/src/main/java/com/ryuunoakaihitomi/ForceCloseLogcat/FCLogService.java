@@ -180,7 +180,16 @@ public class FCLogService extends Service implements Runnable {
                                             String path = LOG_DIR + "/" + time + "_" + FCLogInfoBridge.getFcPackageName() + ".log";
                                             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT)
                                                 path = path.replace(':', '.');
-                                            final String LOG_FILTER_OUTPUT_CMD = "logcat -v raw -d -s AndroidRuntime:E,DEBUG:F,ActivityManager:E";
+                                            //选择日志过滤条件
+                                            String logFilter;
+                                            if ((J_SIGNAL[0].equals(headerJudge.getTag())))
+                                                logFilter = "AndroidRuntime:E";
+                                            else if ((N_SIGNAL[0].equals(headerJudge.getTag())))
+                                                logFilter = "DEBUG:F";
+                                            else
+                                                logFilter = "ActivityManager:E";
+                                            Log.i(TAG, "run: set logcat filter:" + logFilter);
+                                            final String LOG_FILTER_OUTPUT_CMD = "logcat -v raw -d -s " + logFilter;
                                             TxtFileIO.W(path, Utils.cmd(LOG_FILTER_OUTPUT_CMD, Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || Build.VERSION.SDK_INT > Build.VERSION_CODES.O));
                                             long logLength = new File(path).length();
                                             Log.d(TAG, "run: logLength:" + logLength);
