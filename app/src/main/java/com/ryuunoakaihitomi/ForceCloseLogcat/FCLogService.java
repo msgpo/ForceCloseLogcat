@@ -202,7 +202,8 @@ public class FCLogService extends Service implements Runnable {
                                                 logFilter = "ActivityManager:E";
                                             Log.i(TAG, "run: set logcat filter:" + logFilter);
                                             final String LOG_FILTER_OUTPUT_CMD = "logcat -v raw -d -s " + logFilter;
-                                            TxtFileIO.W(path, Utils.cmd(LOG_FILTER_OUTPUT_CMD, Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || Build.VERSION.SDK_INT > Build.VERSION_CODES.O));
+                                            TxtFileIO.W(path, Utils.cmd(LOG_FILTER_OUTPUT_CMD, Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || Build.VERSION.SDK_INT > Build.VERSION_CODES.O)
+                                                    .replaceAll(LOG_BUFFER_DIVIDER + ".*\n", ""));
                                             long logLength = new File(path).length();
                                             Log.d(TAG, "run: logLength:" + logLength);
                                             FCLogInfoBridge.setLogPath(path);
