@@ -6,8 +6,8 @@ android {
         applicationId "com.ryuunoakaihitomi.ForceCloseLogcat"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 41
-        versionName "6.0.6.3"
+        versionCode 42
+        versionName "6.0.6.7"
     }
     buildTypes {
         release {

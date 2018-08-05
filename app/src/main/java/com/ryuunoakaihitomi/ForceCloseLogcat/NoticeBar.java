@@ -74,11 +74,13 @@ public class NoticeBar {
                 .putExtra(LogViewer.EXTAG_PATH, FCLogInfoBridge.getLogPath())
                 .putExtra(LogViewer.EXTAG_ENVINFO, RuntimeEnvInfo.get())
                 .putExtra(LogViewer.EXTAG_NOTICE_ID, nid), PendingIntent.FLAG_UPDATE_CURRENT);
+        String appName = getProgramNameByPackageName(FCLogInfoBridge.getFcPackageName());
+        if (appName == null)
+            appName = FCLogInfoBridge.getFcPackageName();
         Notification.Builder builder = new Notification.Builder(c)
                 .setWhen(0)
                 .setContentTitle(c.getString(R.string.fc_found))
-                .setSubText(String.format(c.getString(R.string.fcnoti_subtext)
-                        , getProgramNameByPackageName(FCLogInfoBridge.getFcPackageName()), FCLogInfoBridge.getFcPID()))
+                .setSubText(String.format(c.getString(R.string.fcnoti_subtext), appName, FCLogInfoBridge.getFcPID()))
                 .setContentText(FCLogInfoBridge.getFcTime())
                 .setContentIntent(pendingIntent)
                 .setStyle(bigTextStyle)

@@ -160,12 +160,9 @@ public class FCLogService extends Service implements Runnable {
                                 } else if (line.contains(N_PROC_SIGNAL[0]) && line.contains(N_PROC_SIGNAL[1])) {
                                     FCLogInfoBridge.setFcPackageName(line.subSequence(line.indexOf(N_PROC_SIGNAL[0]) + N_PROC_SIGNAL[0].length(), line.indexOf(N_PROC_SIGNAL[1])).toString());
                                     FCLogInfoBridge.setFcPID(line.subSequence(line.indexOf(N_PROC_SIGNAL[2]) + N_PROC_SIGNAL[2].length(), line.indexOf(N_PROC_SIGNAL[3])).toString());
-                                } else {
-                                    if (ANR_PROC_SIGNAL[0].equals(new LogObject(line).getTag()))
-                                        if (line.contains(ANR_PROC_SIGNAL[1]))
-                                            FCLogInfoBridge.setFcPID(line.substring(line.indexOf(ANR_PROC_SIGNAL[1]) + ANR_PROC_SIGNAL[1].length()));
-                                        else
-                                            FCLogInfoBridge.setFcPackageName(new LogObject(line).getRaw().substring(new LogObject(line).getRaw().indexOf(ANR_PROC_SIGNAL[0]) + ANR_PROC_SIGNAL[0].length()).split(" +")[0]);
+                                } else if (line.contains(ANR_PROC_SIGNAL[1])) {
+                                    FCLogInfoBridge.setFcPID(line.substring(line.indexOf(ANR_PROC_SIGNAL[1]) + ANR_PROC_SIGNAL[1].length()));
+                                    FCLogInfoBridge.setFcPackageName(headerJudge.getRaw().substring(headerJudge.getRaw().indexOf(ANR_PROC_SIGNAL[0]) + ANR_PROC_SIGNAL[0].length()).split(" +")[0]);
                                 }
                             }
                             if (!this.getClass().getPackage().getName().equals(FCLogInfoBridge.getFcPackageName())) {
@@ -244,13 +241,18 @@ public class FCLogService extends Service implements Runnable {
 
     //清除日志
     void cleanLog() {
-        final String CLEAN_LOG_CMD = "logcat -c";
+        Log.d(TAG, "cleanLog");
+        String CLEAN_LOG_CMD = "logcat -c";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            CLEAN_LOG_CMD = "logcat -b all -c";
+        String ret = null;
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || Build.VERSION.SDK_INT > Build.VERSION_CODES.O)
-            Utils.cmd(CLEAN_LOG_CMD, true);
+            ret = Utils.cmd(CLEAN_LOG_CMD, true);
         else if (checkLogPerm())
-            Utils.cmd(CLEAN_LOG_CMD, false);
+            ret = Utils.cmd(CLEAN_LOG_CMD, false);
         else if (isRoot)
-            Utils.cmd(CLEAN_LOG_CMD, true);
+            ret = Utils.cmd(CLEAN_LOG_CMD, true);
+        Log.d(TAG, "cleanLog: ret=" + ret);
     }
 
     //检查日志读取权限

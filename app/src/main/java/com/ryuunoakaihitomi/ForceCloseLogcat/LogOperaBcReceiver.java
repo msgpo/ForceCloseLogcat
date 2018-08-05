@@ -1,5 +1,6 @@
 package com.ryuunoakaihitomi.ForceCloseLogcat;
 
+import android.annotation.SuppressLint;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -7,6 +8,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Objects;
 
 import static com.ryuunoakaihitomi.ForceCloseLogcat.LogViewer.EXTAG_ENVINFO;
@@ -32,6 +35,7 @@ public class LogOperaBcReceiver {
             new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
+                    collapseStatusBar(MyApplication.getContext());
                     logPath = intent.getStringExtra(EXTAG_PATH);
                     envInfo = intent.getStringExtra(EXTAG_ENVINFO);
                     Utils.simpleToast(MyApplication.getContext(), MyApplication.getContext().getString(R.string.copied_info), false, false);
@@ -49,6 +53,7 @@ public class LogOperaBcReceiver {
             new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
+                    collapseStatusBar(MyApplication.getContext());
                     logPath = intent.getStringExtra(EXTAG_PATH);
                     envInfo = intent.getStringExtra(EXTAG_ENVINFO);
                     Intent intentSend = new Intent(Intent.ACTION_SEND);
@@ -88,5 +93,22 @@ public class LogOperaBcReceiver {
                 envInfo +
                 "\n#######ForceCloseCrashLog#######\n" +
                 TxtFileIO.R(logPath);
+    }
+
+    /**
+     * 折叠状态栏
+     *
+     * @param context 带有android.permission.EXPAND_STATUS_BAR权限的上下文
+     */
+    static void collapseStatusBar(Context context) {
+        //https://android.googlesource.com/platform/prebuilts/runtime/+/master/appcompat/hiddenapi-light-greylist.txt
+        @SuppressWarnings("SpellCheckingInspection") @SuppressLint("WrongConstant") Object statusBarService = context.getSystemService("statusbar");
+        try {
+            @SuppressLint("PrivateApi") Class<?> statusBarMgrClz = Class.forName("android.app.StatusBarManager");
+            Method collapsePanels = statusBarMgrClz.getMethod("collapsePanels");
+            collapsePanels.invoke(statusBarService);
+        } catch (ClassNotFoundException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
     }
 }
