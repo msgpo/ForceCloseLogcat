@@ -8,7 +8,11 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
@@ -46,6 +50,8 @@ public class NoticeBar {
             builder = new Notification.Builder(c, SSchannelId);
         } else
             builder = new Notification.Builder(c);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
+            builder.setTicker(c.getString(R.string.service_name) + c.getString(R.string.running));
         builder
                 .setContentTitle(c.getString(R.string.service_name))
                 .setContentText(c.getString(R.string.running))
@@ -75,9 +81,28 @@ public class NoticeBar {
                 .putExtra(LogViewer.EXTAG_ENVINFO, RuntimeEnvInfo.get())
                 .putExtra(LogViewer.EXTAG_NOTICE_ID, nid), PendingIntent.FLAG_UPDATE_CURRENT);
         String appName = getProgramNameByPackageName(FCLogInfoBridge.getFcPackageName());
+        Notification.Builder builder = new Notification.Builder(c);
         if (appName == null)
             appName = FCLogInfoBridge.getFcPackageName();
-        Notification.Builder builder = new Notification.Builder(c)
+        else {
+            try {
+                Drawable icon = c.getPackageManager().getApplicationIcon(FCLogInfoBridge.getFcPackageName());
+                if (icon instanceof BitmapDrawable)
+                    builder.setLargeIcon(((BitmapDrawable) icon).getBitmap());
+                else {
+                    //AdaptiveIconDrawable?
+                    Bitmap bitmap = Bitmap.createBitmap(icon.getIntrinsicWidth(), icon.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(bitmap);
+                    icon.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+                    icon.draw(canvas);
+                    builder.setLargeIcon(bitmap);
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                //不可能转到这个逻辑
+                Log.e(TAG, "onFCFounded: IMPOSSIBLE", e);
+            }
+        }
+        builder
                 .setWhen(0)
                 .setContentTitle(c.getString(R.string.fc_found))
                 .setSubText(String.format(c.getString(R.string.fcnoti_subtext), appName, FCLogInfoBridge.getFcPID()))
@@ -106,6 +131,8 @@ public class NoticeBar {
             Objects.requireNonNull(c.getSystemService(NotificationManager.class)).createNotificationChannel(notificationChannel);
             builder.setChannelId(FCchannelId);
         }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
+            builder.setTicker(c.getString(R.string.fc_found) + "->" + appName);
         builder.setDeleteIntent(PendingIntent.getBroadcast(c, 0, slide, PendingIntent.FLAG_UPDATE_CURRENT));
         Notification notification = builder.build();
         NotificationManager notificationManager = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);

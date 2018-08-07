@@ -2,11 +2,13 @@ package com.ryuunoakaihitomi.ForceCloseLogcat;
 
 import android.app.Activity;
 import android.app.AlertDialog.Builder;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -91,7 +93,12 @@ public class Help extends Activity {
     }
 
     void openURL(String link) {
-        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(link)));
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(link)));
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, "Web browser?", Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
         finish();
     }
 }

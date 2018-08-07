@@ -82,6 +82,7 @@ public class LogOperaBcReceiver {
         }
     }
 
+    @SuppressWarnings("SpellCheckingInspection")
     static void unreg() {
         for (BroadcastReceiver broadcastReceiver : broadcastReceivers) {
             MyApplication.getContext().unregisterReceiver(broadcastReceiver);
