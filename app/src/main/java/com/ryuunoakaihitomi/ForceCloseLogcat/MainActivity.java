@@ -94,8 +94,7 @@ public class MainActivity extends Activity {
     private void requestIgnoreBatteryOptimizations() {
         if (!getSystemService(PowerManager.class).isIgnoringBatteryOptimizations(getPackageName()))
             try {
-                Intent intent = new Intent();
-                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
                 intent.setData(Uri.parse("package:" + getPackageName()));
                 startActivityForResult(intent, REQUEST_IGNORE_BATTERY_CODE);
             } catch (ActivityNotFoundException e) {
@@ -111,11 +110,13 @@ public class MainActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IGNORE_BATTERY_CODE) {
-            if (resultCode == RESULT_OK)
+            if (resultCode == RESULT_OK) {
                 Log.v(toString(), "succeeded");
-            else
+                welcome();
+            } else {
                 Log.e(toString(), "onActivityResult: requestIgnoreBatteryOptimizations failed");
-            welcome();
+                requestIgnoreBatteryOptimizations();
+            }
         }
     }
 }

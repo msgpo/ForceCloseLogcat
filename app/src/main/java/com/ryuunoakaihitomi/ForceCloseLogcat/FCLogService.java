@@ -54,16 +54,16 @@ public class FCLogService extends Service implements Runnable {
     public void onCreate() {
         super.onCreate();
         isRoot = Utils.isRoot();
+        boolean isReadLogPermissionGranted = checkLogPerm();
         isAlive = true;
         cleanLog();
         //权限检查与试图开启
-        Log.i(TAG, "onCreate: READ_LOGS perm granted:" + checkLogPerm() + " isRoot:" + isRoot);
-        if (!isRoot && !checkLogPerm()) {
-            onPermissionDenied();
-        }
-        if (isRoot && !checkLogPerm()) {
-            Utils.cmd("pm grant com.ryuunoakaihitomi.ForceCloseLogcat android.permission.READ_LOGS", true);
-        }
+        Log.i(TAG, "onCreate: READ_LOGS perm granted:" + isReadLogPermissionGranted + " isRoot:" + isRoot);
+        if (!isReadLogPermissionGranted)
+            if (!isRoot)
+                onPermissionDenied();
+            else
+                Utils.cmd("pm grant " + getPackageName() + " android.permission.READ_LOGS", true);
         startForeground(NOTICE_ID, NoticeBar.serviceStart());
         LogOperaBcReceiver.reg();
         Thread thread = new Thread(this);
@@ -199,7 +199,7 @@ public class FCLogService extends Service implements Runnable {
                                                 logFilter = "ActivityManager:E";
                                             Log.i(TAG, "run: set logcat filter:" + logFilter);
                                             final String LOG_FILTER_OUTPUT_CMD = "logcat -v raw -d -s " + logFilter;
-                                            TxtFileIO.W(path, Utils.cmd(LOG_FILTER_OUTPUT_CMD, Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || Build.VERSION.SDK_INT > Build.VERSION_CODES.O)
+                                            TxtFileIO.W(path, Utils.cmd(LOG_FILTER_OUTPUT_CMD, Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
                                                     .replaceAll(LOG_BUFFER_DIVIDER + ".*\n", "").replace(N_SIGNAL[2] + System.getProperty("line.separator"), ""));
                                             long logLength = new File(path).length();
                                             Log.d(TAG, "run: logLength:" + logLength);
@@ -245,14 +245,12 @@ public class FCLogService extends Service implements Runnable {
         String CLEAN_LOG_CMD = "logcat -c";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
             CLEAN_LOG_CMD = "logcat -b all -c";
-        String ret = null;
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP || Build.VERSION.SDK_INT > Build.VERSION_CODES.O)
-            ret = Utils.cmd(CLEAN_LOG_CMD, true);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
+            Utils.cmd(CLEAN_LOG_CMD, true);
         else if (checkLogPerm())
-            ret = Utils.cmd(CLEAN_LOG_CMD, false);
+            Utils.cmd(CLEAN_LOG_CMD, false);
         else if (isRoot)
-            ret = Utils.cmd(CLEAN_LOG_CMD, true);
-        Log.d(TAG, "cleanLog: ret=" + ret);
+            Utils.cmd(CLEAN_LOG_CMD, true);
     }
 
     //检查日志读取权限

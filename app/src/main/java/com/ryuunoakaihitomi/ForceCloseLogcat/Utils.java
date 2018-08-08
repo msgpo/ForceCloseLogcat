@@ -74,7 +74,7 @@ public class Utils {
             d.writeBytes("exit\n");
             d.flush();
             try {
-                System.out.println("cmd: exitValue=" + p.waitFor());
+                System.out.println("cmd: \"" + command + "\" exitValue=" + p.waitFor());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

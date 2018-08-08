@@ -55,7 +55,7 @@ public class LogViewer extends Activity {
             webSettings.setBuiltInZoomControls(true);
             webSettings.setDisplayZoomControls(false);
             //尽可能模拟原先的显示样式
-            webView.loadData("<body style=background-color:black><p style=font-size:8pt;color:#0F0;word-break:keep-all>" + message.replace("\n", "<br>") + "</p></body>", null, null);
+            webView.loadData("<body style=background-color:black;font-size:8pt;color:#0F0;word-break:keep-all>" + message.replace("\n", "<br>") + "</body>", null, null);
             builder.setView(webView);
         } else
             builder.setMessage(message);

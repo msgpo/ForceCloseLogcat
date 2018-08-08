@@ -15,6 +15,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.Objects;
@@ -68,7 +69,11 @@ public class NoticeBar {
 
     public static void onFCFounded() {
         Notification.BigTextStyle bigTextStyle = new Notification.BigTextStyle();
-        bigTextStyle.bigText(TxtFileIO.R(FCLogInfoBridge.getLogPath()));
+        boolean isLogEmpty = TextUtils.isEmpty(TxtFileIO.R(FCLogInfoBridge.getLogPath()));
+        if (isLogEmpty)
+            bigTextStyle.bigText(c.getText(R.string.null_log_body));
+        else
+            bigTextStyle.bigText(TxtFileIO.R(FCLogInfoBridge.getLogPath()));
         int nid;
         if (ConfigMgr.getBoolean(ConfigMgr.Options.ONE_NOTICE))
             nid = Integer.MAX_VALUE;
@@ -118,21 +123,22 @@ public class NoticeBar {
                 slide = operationBaseIntent(LogOperaBcReceiver.EXACT_SLIDE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
             builder.setColor(Color.RED);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH)
-            builder.addAction(new Notification.Action(0, c.getString(R.string.copy), PendingIntent.getBroadcast(c, nid, copy, PendingIntent.FLAG_UPDATE_CURRENT)))
-                    .addAction(new Notification.Action(0, c.getString(R.string.delete), PendingIntent.getBroadcast(c, nid, delete, PendingIntent.FLAG_UPDATE_CURRENT)))
-                    .addAction(new Notification.Action(0, c.getString(R.string.share), PendingIntent.getBroadcast(c, nid, share, PendingIntent.FLAG_UPDATE_CURRENT)));
-        else
-            builder.addAction(0, c.getString(R.string.delete), PendingIntent.getBroadcast(c, nid, delete, PendingIntent.FLAG_UPDATE_CURRENT))
-                    .addAction(0, c.getString(R.string.copy), PendingIntent.getBroadcast(c, nid, copy, PendingIntent.FLAG_UPDATE_CURRENT))
-                    .addAction(0, c.getString(R.string.share), PendingIntent.getBroadcast(c, nid, share, PendingIntent.FLAG_UPDATE_CURRENT));
+        if (!isLogEmpty)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH)
+                builder.addAction(new Notification.Action(0, c.getString(R.string.copy), PendingIntent.getBroadcast(c, nid, copy, PendingIntent.FLAG_UPDATE_CURRENT)))
+                        .addAction(new Notification.Action(0, c.getString(R.string.delete), PendingIntent.getBroadcast(c, nid, delete, PendingIntent.FLAG_UPDATE_CURRENT)))
+                        .addAction(new Notification.Action(0, c.getString(R.string.share), PendingIntent.getBroadcast(c, nid, share, PendingIntent.FLAG_UPDATE_CURRENT)));
+            else
+                builder.addAction(0, c.getString(R.string.delete), PendingIntent.getBroadcast(c, nid, delete, PendingIntent.FLAG_UPDATE_CURRENT))
+                        .addAction(0, c.getString(R.string.copy), PendingIntent.getBroadcast(c, nid, copy, PendingIntent.FLAG_UPDATE_CURRENT))
+                        .addAction(0, c.getString(R.string.share), PendingIntent.getBroadcast(c, nid, share, PendingIntent.FLAG_UPDATE_CURRENT));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel notificationChannel = new NotificationChannel(FCchannelId, FCchannelName, NotificationManager.IMPORTANCE_DEFAULT);
             Objects.requireNonNull(c.getSystemService(NotificationManager.class)).createNotificationChannel(notificationChannel);
             builder.setChannelId(FCchannelId);
         }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
-            builder.setTicker(c.getString(R.string.fc_found) + "->" + appName);
+            builder.setTicker(c.getString(R.string.fc_found) + " -> " + appName);
         builder.setDeleteIntent(PendingIntent.getBroadcast(c, 0, slide, PendingIntent.FLAG_UPDATE_CURRENT));
         Notification notification = builder.build();
         NotificationManager notificationManager = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
