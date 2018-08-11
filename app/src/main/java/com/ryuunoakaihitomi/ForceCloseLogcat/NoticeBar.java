@@ -1,6 +1,5 @@
 package com.ryuunoakaihitomi.ForceCloseLogcat;
 
-import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -26,29 +25,24 @@ import java.util.Objects;
 
 public class NoticeBar {
     private static final String TAG = "NoticeBar";
-    @SuppressLint("StaticFieldLeak")
-    private static Context c = MyApplication.getContext();
     private static int id = Integer.MIN_VALUE;
-    @SuppressWarnings("FieldCanBeLocal")
-    private static String SSchannelId = "FClog.ncids",
-            SSchannelName = "ForceCloseLogcat ServiceKeeper",
-            FCchannelId = "FClog.ncidf",
-            FCchannelName = "ForceCloseLogcat FCCrashReport";
 
-    private static Intent operationBaseIntent(String whichAction) {
+    private static Intent operationBaseIntent(Context context, String whichAction) {
         return new Intent(whichAction)
                 .putExtra(LogViewer.EXTAG_PATH, FCLogInfoBridge.getLogPath())
-                .putExtra(LogViewer.EXTAG_ENVINFO, RuntimeEnvInfo.get())
+                .putExtra(LogViewer.EXTAG_ENVINFO, RuntimeEnvInfo.get(context))
                 .putExtra(LogViewer.EXTAG_NOTICE_ID, id);
     }
 
-    public static Notification serviceStart() {
+    public static Notification serviceStart(Context c) {
+        String fsChannelName = c.getString(R.string.foreground_srv_channel_name);
+        String fsChannelId = "FClog.serviceStart";
         Notification.Builder builder;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel notificationChannel = new NotificationChannel(SSchannelId, SSchannelName, NotificationManager.IMPORTANCE_LOW);
+            NotificationChannel notificationChannel = new NotificationChannel(fsChannelId, fsChannelName, NotificationManager.IMPORTANCE_LOW);
             //noinspection ConstantConditions
             c.getSystemService(NotificationManager.class).createNotificationChannel(notificationChannel);
-            builder = new Notification.Builder(c, SSchannelId);
+            builder = new Notification.Builder(c, fsChannelId);
         } else
             builder = new Notification.Builder(c);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
@@ -67,7 +61,9 @@ public class NoticeBar {
         return builder.build();
     }
 
-    public static void onFCFounded() {
+    public static void onFCFounded(Context c) {
+        String crChannelName = c.getString(R.string.crash_report_channel_name);
+        String crChannelId = "FClog.onFCFounded";
         Notification.BigTextStyle bigTextStyle = new Notification.BigTextStyle();
         boolean isLogEmpty = TextUtils.isEmpty(TxtFileIO.R(FCLogInfoBridge.getLogPath()));
         if (isLogEmpty)
@@ -83,9 +79,9 @@ public class NoticeBar {
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS | Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 .setData(Uri.parse("custom://" + System.currentTimeMillis()))
                 .putExtra(LogViewer.EXTAG_PATH, FCLogInfoBridge.getLogPath())
-                .putExtra(LogViewer.EXTAG_ENVINFO, RuntimeEnvInfo.get())
+                .putExtra(LogViewer.EXTAG_ENVINFO, RuntimeEnvInfo.get(c))
                 .putExtra(LogViewer.EXTAG_NOTICE_ID, nid), PendingIntent.FLAG_UPDATE_CURRENT);
-        String appName = getProgramNameByPackageName(FCLogInfoBridge.getFcPackageName());
+        String appName = getProgramNameByPackageName(c, FCLogInfoBridge.getFcPackageName());
         Notification.Builder builder = new Notification.Builder(c);
         if (appName == null)
             appName = FCLogInfoBridge.getFcPackageName();
@@ -117,10 +113,10 @@ public class NoticeBar {
                 .setAutoCancel(true)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setPriority(Notification.PRIORITY_MAX);
-        Intent copy = operationBaseIntent(LogOperaBcReceiver.EXACT_COPY),
-                delete = operationBaseIntent(LogOperaBcReceiver.EXACT_DELETE),
-                share = operationBaseIntent(LogOperaBcReceiver.EXACT_SHARE),
-                slide = operationBaseIntent(LogOperaBcReceiver.EXACT_SLIDE);
+        Intent copy = operationBaseIntent(c, LogOperaBcReceiver.EXACT_COPY),
+                delete = operationBaseIntent(c, LogOperaBcReceiver.EXACT_DELETE),
+                share = operationBaseIntent(c, LogOperaBcReceiver.EXACT_SHARE),
+                slide = operationBaseIntent(c, LogOperaBcReceiver.EXACT_SLIDE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
             builder.setColor(Color.RED);
         if (!isLogEmpty)
@@ -133,9 +129,9 @@ public class NoticeBar {
                         .addAction(0, c.getString(R.string.copy), PendingIntent.getBroadcast(c, nid, copy, PendingIntent.FLAG_UPDATE_CURRENT))
                         .addAction(0, c.getString(R.string.share), PendingIntent.getBroadcast(c, nid, share, PendingIntent.FLAG_UPDATE_CURRENT));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel notificationChannel = new NotificationChannel(FCchannelId, FCchannelName, NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationChannel notificationChannel = new NotificationChannel(crChannelId, crChannelName, NotificationManager.IMPORTANCE_DEFAULT);
             Objects.requireNonNull(c.getSystemService(NotificationManager.class)).createNotificationChannel(notificationChannel);
-            builder.setChannelId(FCchannelId);
+            builder.setChannelId(crChannelId);
         }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
             builder.setTicker(c.getString(R.string.fc_found) + " -> " + appName);
@@ -147,8 +143,8 @@ public class NoticeBar {
         Log.d(TAG, "onFCFounded: end id:" + id);
     }
 
-    private static String getProgramNameByPackageName(String packageName) {
-        PackageManager pm = MyApplication.getContext().getPackageManager();
+    private static String getProgramNameByPackageName(Context context, String packageName) {
+        PackageManager pm = context.getPackageManager();
         String name = null;
         try {
             name = pm.getApplicationLabel(

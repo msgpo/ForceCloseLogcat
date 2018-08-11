@@ -36,7 +36,7 @@ public class MyApplication extends Application implements Thread.UncaughtExcepti
         FCLogInfoBridge.setFcPackageName(this.getClass().getPackage().getName());
         FCLogInfoBridge.setFcTime(String.valueOf(System.currentTimeMillis()));
         TxtFileIO.W(FCLogService.LOG_DIR + "/" + FCLogInfoBridge.getFcTime() + "_MyCrash.log",
-                "EnvInfo:\n" + RuntimeEnvInfo.get() + "\nFCLog:\n"
+                "EnvInfo:\n" + RuntimeEnvInfo.get(context) + "\nFCLog:\n"
                         + Log.getStackTraceString(e) + "\nFinalLog:\n" + FCLogInfoBridge.log);
         SystemClock.sleep(CRASH_UI_FREEZE_DELAY);
         Process.killProcess(Process.myPid());

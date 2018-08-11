@@ -1,5 +1,6 @@
 package com.ryuunoakaihitomi.ForceCloseLogcat;
 
+import android.content.Context;
 import android.os.Build;
 
 import java.util.HashMap;
@@ -11,7 +12,7 @@ import java.util.Objects;
  */
 
 public class RuntimeEnvInfo {
-    public static String get() {
+    public static String get(Context context) {
         String infoBody = "";
         infoBody += "crash time=" + FCLogInfoBridge.getFcTime() + "\n";
         infoBody += "model=" + Build.MODEL + "\n";
@@ -21,8 +22,8 @@ public class RuntimeEnvInfo {
         infoBody += "board=" + Build.BOARD + "\n";
         infoBody += "hardware=" + Build.HARDWARE + "\n";
         infoBody += "device=" + Build.DEVICE + "\n";
-        if (!Objects.requireNonNull(Utils.getAppVersionName(FCLogInfoBridge.getFcPackageName())).isEmpty()) {
-            infoBody += "version name=" + Utils.getAppVersionName(FCLogInfoBridge.getFcPackageName()) + "\n";
+        if (!Objects.requireNonNull(Utils.getAppVersionName(context, FCLogInfoBridge.getFcPackageName())).isEmpty()) {
+            infoBody += "version name=" + Utils.getAppVersionName(context, FCLogInfoBridge.getFcPackageName()) + "\n";
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             infoBody += "supported abis=" + stringArrayToString(Build.SUPPORTED_ABIS, " & ") + "\n";

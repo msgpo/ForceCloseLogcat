@@ -64,8 +64,8 @@ public class FCLogService extends Service implements Runnable {
                 onPermissionDenied();
             else
                 Utils.cmd("pm grant " + getPackageName() + " android.permission.READ_LOGS", true);
-        startForeground(NOTICE_ID, NoticeBar.serviceStart());
-        LogOperaBcReceiver.reg();
+        startForeground(NOTICE_ID, NoticeBar.serviceStart(this));
+        LogOperaBcReceiver.reg(this);
         Thread thread = new Thread(this);
         //增加优先级方法1
         thread.setPriority(Thread.MAX_PRIORITY);
@@ -205,7 +205,7 @@ public class FCLogService extends Service implements Runnable {
                                             Log.d(TAG, "run: logLength:" + logLength);
                                             FCLogInfoBridge.setLogPath(path);
                                             if (!isQuietModeEnable)
-                                                NoticeBar.onFCFounded();
+                                                NoticeBar.onFCFounded(FCLogService.this);
                                             else
                                                 震える();
                                         }
@@ -233,7 +233,7 @@ public class FCLogService extends Service implements Runnable {
     @Override
     public void onDestroy() {
         unregisterReceiver(tickReceiver);
-        LogOperaBcReceiver.unreg();
+        LogOperaBcReceiver.unreg(this);
         isAlive = false;
         stopForeground(true);
         super.onDestroy();
@@ -296,5 +296,11 @@ public class FCLogService extends Service implements Runnable {
         Log.e(TAG, "onCreate: I do not have permission to read the system log.");
         Utils.simpleToast(this, getString(R.string.no_read_log_perm), true, true);
         stopSelf();
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        Log.i(TAG, "onTrimMemory: level:" + level);
+        System.gc();
     }
 }

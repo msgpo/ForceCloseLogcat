@@ -35,11 +35,11 @@ public class LogOperaBcReceiver {
             new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    collapseStatusBar(MyApplication.getContext());
+                    collapseStatusBar(context);
                     logPath = intent.getStringExtra(EXTAG_PATH);
                     envInfo = intent.getStringExtra(EXTAG_ENVINFO);
-                    Utils.simpleToast(MyApplication.getContext(), MyApplication.getContext().getString(R.string.copied_info), false, false);
-                    Utils.copyToClipboard(packageLog());
+                    Utils.simpleToast(context, context.getString(R.string.copied_info), false, false);
+                    Utils.copyToClipboard(context, packageLog());
                 }
             },
             new BroadcastReceiver() {
@@ -53,7 +53,7 @@ public class LogOperaBcReceiver {
             new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    collapseStatusBar(MyApplication.getContext());
+                    collapseStatusBar(context);
                     logPath = intent.getStringExtra(EXTAG_PATH);
                     envInfo = intent.getStringExtra(EXTAG_ENVINFO);
                     Intent intentSend = new Intent(Intent.ACTION_SEND);
@@ -74,18 +74,18 @@ public class LogOperaBcReceiver {
             },
     };
 
-    static void reg() {
+    static void reg(Context context) {
         for (int i = 0; i < broadcastReceivers.length; i++) {
             IntentFilter filter = new IntentFilter();
             filter.addAction(actions[i]);
-            MyApplication.getContext().registerReceiver(broadcastReceivers[i], filter);
+            context.registerReceiver(broadcastReceivers[i], filter);
         }
     }
 
     @SuppressWarnings("SpellCheckingInspection")
-    static void unreg() {
+    static void unreg(Context context) {
         for (BroadcastReceiver broadcastReceiver : broadcastReceivers) {
-            MyApplication.getContext().unregisterReceiver(broadcastReceiver);
+            context.unregisterReceiver(broadcastReceiver);
         }
     }
 

@@ -122,13 +122,14 @@ public class Utils {
     /**
      * 取应用版本名
      *
+     * @param context     上下文
      * @param PackageName 包名
      * @return 版本名String
      */
-    static String getAppVersionName(String PackageName) {
+    static String getAppVersionName(Context context, String PackageName) {
         String versionName = "";
         try {
-            PackageManager packageManager = MyApplication.getContext().getPackageManager();
+            PackageManager packageManager = context.getPackageManager();
             PackageInfo packageInfo = packageManager.getPackageInfo(PackageName, 0);
             versionName = packageInfo.versionName;
             if (versionName == null || versionName.length() <= 0) {
@@ -142,10 +143,11 @@ public class Utils {
     /**
      * 复制到剪贴板
      *
-     * @param text 要复制的文本
+     * @param context 上下文
+     * @param text    要复制的文本
      */
-    static void copyToClipboard(String text) {
-        ((ClipboardManager) Objects.requireNonNull(MyApplication.getContext().getSystemService(Context.CLIPBOARD_SERVICE)))
+    static void copyToClipboard(Context context, String text) {
+        ((ClipboardManager) Objects.requireNonNull(context.getSystemService(Context.CLIPBOARD_SERVICE)))
                 .setPrimaryClip(ClipData.newPlainText(null, text));
     }
 }

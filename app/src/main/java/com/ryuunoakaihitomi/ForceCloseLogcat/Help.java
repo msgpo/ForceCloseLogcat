@@ -84,12 +84,12 @@ public class Help extends Activity {
             builder.setNeutralButton(R.string.copy_adb_cmd, new OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    Utils.copyToClipboard("adb shell pm grant com.ryuunoakaihitomi.ForceCloseLogcat android.permission.READ_LOGS");
+                    Utils.copyToClipboard(Help.this, "adb shell pm grant com.ryuunoakaihitomi.ForceCloseLogcat android.permission.READ_LOGS");
                     finish();
                 }
             });
         builder.show();
-        Utils.simpleToast(this, String.format(getString(R.string.help_toast), Utils.getAppVersionName(getPackageName()), getString(R.string.help_update_time)), false, false);
+        Utils.simpleToast(this, String.format(getString(R.string.help_toast), Utils.getAppVersionName(this, getPackageName()), getString(R.string.help_update_time)), false, false);
     }
 
     void openURL(String link) {

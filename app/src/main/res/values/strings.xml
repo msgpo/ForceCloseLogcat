@@ -39,4 +39,6 @@
     <string name="need_wes_perm_notice">在部分系统中可能需要存储权限才能保存日志</string>
     <string name="battery_opti_warn">不忽略电池优化可能无法保证熄屏下本应用的有效性</string>
     <string name="null_log_body">日志为空(存储权限?)</string>
+    <string name="foreground_srv_channel_name">前台服务</string>
+    <string name="crash_report_channel_name">崩溃通知</string>
 </resources>
