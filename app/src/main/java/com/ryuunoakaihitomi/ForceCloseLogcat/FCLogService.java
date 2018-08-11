@@ -158,7 +158,12 @@ public class FCLogService extends Service implements Runnable {
                                     FCLogInfoBridge.setFcPackageName(pkgNameTmp);
                                     FCLogInfoBridge.setFcPID(line.subSequence(line.indexOf(J_PROC_SIGNAL[1]) + J_PROC_SIGNAL[1].length(), line.length()).toString());
                                 } else if (line.contains(N_PROC_SIGNAL[0]) && line.contains(N_PROC_SIGNAL[1])) {
-                                    FCLogInfoBridge.setFcPackageName(line.subSequence(line.indexOf(N_PROC_SIGNAL[0]) + N_PROC_SIGNAL[0].length(), line.indexOf(N_PROC_SIGNAL[1])).toString());
+                                    String pkgNameTmp = line.subSequence(line.indexOf(N_PROC_SIGNAL[0]) + N_PROC_SIGNAL[0].length(), line.indexOf(N_PROC_SIGNAL[1])).toString();
+                                    //含有/会新建下几级目录
+                                    //如"/data/user/0/com.ludashi.benchmark/lib/libldsdaemon_2.so"
+                                    //pkgNameTmp = pkgNameTmp.split("/")[pkgNameTmp.split("/").length - 1];
+                                    pkgNameTmp = pkgNameTmp.substring(pkgNameTmp.lastIndexOf("/") + 1, pkgNameTmp.length());
+                                    FCLogInfoBridge.setFcPackageName(pkgNameTmp);
                                     FCLogInfoBridge.setFcPID(line.subSequence(line.indexOf(N_PROC_SIGNAL[2]) + N_PROC_SIGNAL[2].length(), line.indexOf(N_PROC_SIGNAL[3])).toString());
                                 } else if (line.contains(ANR_PROC_SIGNAL[1])) {
                                     FCLogInfoBridge.setFcPID(line.substring(line.indexOf(ANR_PROC_SIGNAL[1]) + ANR_PROC_SIGNAL[1].length()));
