@@ -92,7 +92,13 @@ public class ConfigUI extends Activity {
                                         final JSONObject appListSaver = new JSONObject();
                                         final PackageManager manager = getPackageManager();
                                         List<PackageInfo> infos = manager.getInstalledPackages(0);
-                                        //根据当前区域按照标签排列。注意：这个的实现让我卡了一下。关键词：Collections.sort，Collator
+                                        //删除自身选项
+                                        for (PackageInfo myInfo : infos)
+                                            if (myInfo.packageName.equals(getPackageName())) {
+                                                infos.remove(myInfo);
+                                                break;
+                                            }
+                                        //根据当前区域按照标签排列
                                         Collections.sort(infos, new Comparator<PackageInfo>() {
                                             @Override
                                             public int compare(PackageInfo o1, PackageInfo o2) {
@@ -101,7 +107,7 @@ public class ConfigUI extends Activity {
                                             }
                                         });
                                         int appCount = infos.size();
-                                        Log.i(TAG, "run: appCount:" + appCount);
+                                        Log.i(TAG, "run: appCount:" + appCount + "+1");
                                         final String[] appName = new String[appCount], appList = new String[appCount], appDetails = new String[appCount];
                                         boolean[] cfgShow = new boolean[appCount];
                                         for (int i = 0; i < infos.size(); i++) {

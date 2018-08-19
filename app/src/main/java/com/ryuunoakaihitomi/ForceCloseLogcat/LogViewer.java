@@ -63,7 +63,7 @@ public class LogViewer extends Activity {
                 .setPositiveButton(R.string.share, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        sendBroadcast(new Intent(LogOperaBcReceiver.EXACT_SHARE)
+                        sendBroadcast(new MyIntent(LogOperaBcReceiver.EXACT_SHARE)
                                 .putExtra(LogViewer.EXTAG_PATH, path)
                                 .putExtra(LogViewer.EXTAG_ENVINFO, envInfo));
                         finish();
@@ -72,7 +72,7 @@ public class LogViewer extends Activity {
                 .setNegativeButton(R.string.copy, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        sendBroadcast(new Intent(LogOperaBcReceiver.EXACT_COPY)
+                        sendBroadcast(new MyIntent(LogOperaBcReceiver.EXACT_COPY)
                                 .putExtra(LogViewer.EXTAG_PATH, path)
                                 .putExtra(LogViewer.EXTAG_ENVINFO, envInfo));
                         finish();
@@ -81,7 +81,7 @@ public class LogViewer extends Activity {
                 .setNeutralButton(R.string.delete, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        sendBroadcast(new Intent(LogOperaBcReceiver.EXACT_DELETE)
+                        sendBroadcast(new MyIntent(LogOperaBcReceiver.EXACT_DELETE)
                                 .putExtra(LogViewer.EXTAG_PATH, path));
                         finish();
                     }
@@ -143,6 +143,13 @@ public class LogViewer extends Activity {
             dialog.dismiss();
             dialog = null;
             finish();
+        }
+    }
+
+    class MyIntent extends Intent {
+        MyIntent(String action) {
+            setAction(action);
+            setPackage(getPackageName());
         }
     }
 }

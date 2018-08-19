@@ -14,6 +14,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -29,6 +30,7 @@ public class NoticeBar {
 
     private static Intent operationBaseIntent(Context context, String whichAction) {
         return new Intent(whichAction)
+                .setPackage(context.getPackageName())
                 .putExtra(LogViewer.EXTAG_PATH, FCLogInfoBridge.getLogPath())
                 .putExtra(LogViewer.EXTAG_ENVINFO, RuntimeEnvInfo.get(context))
                 .putExtra(LogViewer.EXTAG_NOTICE_ID, id);
@@ -53,11 +55,15 @@ public class NoticeBar {
                 .setContentIntent(PendingIntent.getActivity(c, 0, new Intent(c, ConfigUI.class), 0))
                 .setOngoing(true)
                 .setSmallIcon(R.mipmap.ic_launcher);
-        Intent killService = new Intent(c, FCLogService.class).setAction(FCLogService.KILL_SIGNAL);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH)
+        Intent killService = new Intent(c, FCLogService.class).setAction(FCLogService.KILL_SIGNAL).setPackage(c.getPackageName());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
+            //Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS  开发者选项 intent action
+            builder.addAction(new Notification.Action(0, c.getString(R.string.developer_option), PendingIntent.getActivity(c, 0, new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS), 0)));
             builder.addAction(new Notification.Action(0, c.getString(R.string.kill_service), PendingIntent.getService(c, 0, killService, 0)));
-        else
+        } else {
+            builder.addAction(0, c.getString(R.string.developer_option), PendingIntent.getActivity(c, 0, new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS), 0));
             builder.addAction(0, c.getString(R.string.kill_service), PendingIntent.getService(c, 0, killService, 0));
+        }
         return builder.build();
     }
 

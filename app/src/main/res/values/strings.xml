@@ -41,4 +41,5 @@
     <string name="null_log_body">日志为空(存储权限?)</string>
     <string name="foreground_srv_channel_name">前台服务</string>
     <string name="crash_report_channel_name">崩溃通知</string>
+    <string name="developer_option">开发者选项</string>
 </resources>

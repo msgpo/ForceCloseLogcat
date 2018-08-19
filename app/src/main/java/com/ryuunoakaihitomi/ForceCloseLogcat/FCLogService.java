@@ -138,15 +138,15 @@ public class FCLogService extends Service implements Runnable {
                                 (ANR_SIGNAL[0].equals(headerJudge.getTag())
                                         && ANR_SIGNAL[1].equals(headerJudge.getLevel())
                                         && headerJudge.getRaw().contains(ANR_SIGNAL[2]))) {
+                            final long start = System.currentTimeMillis();
                             Log.d(TAG, "run: CrashLogPrinter: PID:" + headerJudge.getPID() + " TID:" + headerJudge.getTID());
                             //给低性能设备的crash日志输出进行礼让（测试）
                             Thread.yield();
                             Log.d(TAG, "run: yield()");
-                            final long start = System.currentTimeMillis();
                             if (headerJudge.getRaw().contains(J_SYS_SIGNAL)) {
                                 //对应的标签为"Android 系统"
                                 FCLogInfoBridge.setFcPackageName("android");
-                                FCLogInfoBridge.setFcPID("i");
+                                FCLogInfoBridge.setFcPID(String.valueOf(Build.VERSION.SDK_INT));
                             }
                             while (Arrays.asList(new String[]{J_SIGNAL[0], N_SIGNAL[0], ANR_SIGNAL[0]}).contains(
                                     new LogObject(line = bufferedReader.readLine()).getTag())) {
@@ -224,7 +224,7 @@ public class FCLogService extends Service implements Runnable {
                     }
                 }
             }
-            Log.d(TAG, "run: jumped out the loop.");
+            Log.d(TAG, "run: jumped out of the loop.");
             if (dataOutputStream != null)
                 dataOutputStream.close();
         } catch (IOException e) {
@@ -246,7 +246,7 @@ public class FCLogService extends Service implements Runnable {
 
     //清除日志
     void cleanLog() {
-        Log.d(TAG, "cleanLog");
+        Log.d(TAG, "cleanLog: start");
         String CLEAN_LOG_CMD = "logcat -c";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
             CLEAN_LOG_CMD = "logcat -b all -c";
@@ -256,6 +256,7 @@ public class FCLogService extends Service implements Runnable {
             Utils.cmd(CLEAN_LOG_CMD, false);
         else if (isRoot)
             Utils.cmd(CLEAN_LOG_CMD, true);
+        Log.d(TAG, "cleanLog: end");
     }
 
     //检查日志读取权限
