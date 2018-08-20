@@ -32,12 +32,13 @@ public class MainActivity extends Activity {
             //java.lang.IllegalArgumentException: Unknown operation string: android:write_external_storage
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 //noinspection ConstantConditions
-                if (checkPermission(WRITE_EXTERNAL_STORAGE, Process.myPid(), Process.myUid()) != PackageManager.PERMISSION_GRANTED
-                        || ((AppOpsManager) getSystemService(APP_OPS_SERVICE)).checkOpNoThrow(AppOpsManager.OPSTR_WRITE_EXTERNAL_STORAGE, Process.myUid(), getPackageName()) != AppOpsManager.MODE_ALLOWED)
+                boolean isNotGrantedWriteExternalStoragePermission = checkPermission(WRITE_EXTERNAL_STORAGE, Process.myPid(), Process.myUid()) != PackageManager.PERMISSION_GRANTED
+                        || ((AppOpsManager) getSystemService(APP_OPS_SERVICE)).checkOpNoThrow(AppOpsManager.OPSTR_WRITE_EXTERNAL_STORAGE, Process.myUid(), getPackageName()) != AppOpsManager.MODE_ALLOWED;
+                if (isNotGrantedWriteExternalStoragePermission)
                     Utils.simpleToast(this, getString(R.string.need_wes_perm_notice), false, true);
                 //Android 8.1 Toast overlap
                 if (!Objects.requireNonNull(getSystemService(PowerManager.class)).isIgnoringBatteryOptimizations(getPackageName()))
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 && isNotGrantedWriteExternalStoragePermission)
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
