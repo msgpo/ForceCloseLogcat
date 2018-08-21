@@ -28,7 +28,7 @@ public class NoticeBar {
     private static final String TAG = "NoticeBar";
     private static int id = Integer.MIN_VALUE;
 
-    private static Intent operationBaseIntent(Context context, String whichAction) {
+    private static Intent operationBaseIntent(Context context, String whichAction, int id) {
         return new Intent(whichAction)
                 .setPackage(context.getPackageName())
                 .putExtra(LogViewer.EXTAG_PATH, FCLogInfoBridge.getLogPath())
@@ -45,6 +45,7 @@ public class NoticeBar {
             //noinspection ConstantConditions
             c.getSystemService(NotificationManager.class).createNotificationChannel(notificationChannel);
             builder = new Notification.Builder(c, fsChannelId);
+            builder.setBadgeIconType(Notification.BADGE_ICON_SMALL);
         } else
             builder = new Notification.Builder(c);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
@@ -76,10 +77,18 @@ public class NoticeBar {
             bigTextStyle.bigText(c.getText(R.string.null_log_body));
         else
             bigTextStyle.bigText(TxtFileIO.R(FCLogInfoBridge.getLogPath()));
+        NotificationManager notificationManager = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
+        assert notificationManager != null;
         int nid;
-        if (ConfigMgr.getBoolean(ConfigMgr.Options.ONE_NOTICE))
+        if (ConfigMgr.getBoolean(ConfigMgr.Options.ONE_NOTICE)) {
             nid = Integer.MAX_VALUE;
-        else
+            //防止性能损耗，只允许取消最近一定数量的连续ID通知
+            final int MAX_RECENT_NOTIFICATION_ID_COUNT = 200;
+            //Android N会自动折叠通知
+            if (id - Integer.MIN_VALUE <= MAX_RECENT_NOTIFICATION_ID_COUNT && Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+                for (int i = id; i > Integer.MIN_VALUE; --i)
+                    notificationManager.cancel(i);
+        } else
             nid = ++id;
         PendingIntent pendingIntent = PendingIntent.getActivity(c, nid, new Intent(c, LogViewer.class)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS | Intent.FLAG_ACTIVITY_CLEAR_TOP)
@@ -119,10 +128,10 @@ public class NoticeBar {
                 .setAutoCancel(true)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setPriority(Notification.PRIORITY_MAX);
-        Intent copy = operationBaseIntent(c, LogOperaBcReceiver.EXACT_COPY),
-                delete = operationBaseIntent(c, LogOperaBcReceiver.EXACT_DELETE),
-                share = operationBaseIntent(c, LogOperaBcReceiver.EXACT_SHARE),
-                slide = operationBaseIntent(c, LogOperaBcReceiver.EXACT_SLIDE);
+        Intent copy = operationBaseIntent(c, LogOperaBcReceiver.EXACT_COPY, nid),
+                delete = operationBaseIntent(c, LogOperaBcReceiver.EXACT_DELETE, nid),
+                share = operationBaseIntent(c, LogOperaBcReceiver.EXACT_SHARE, nid),
+                slide = operationBaseIntent(c, LogOperaBcReceiver.EXACT_SLIDE, nid);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
             builder.setColor(Color.RED);
         if (!isLogEmpty)
@@ -138,15 +147,14 @@ public class NoticeBar {
             NotificationChannel notificationChannel = new NotificationChannel(crChannelId, crChannelName, NotificationManager.IMPORTANCE_DEFAULT);
             Objects.requireNonNull(c.getSystemService(NotificationManager.class)).createNotificationChannel(notificationChannel);
             builder.setChannelId(crChannelId);
+            builder.setBadgeIconType(Notification.BADGE_ICON_NONE);
         }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
             builder.setTicker(c.getString(R.string.fc_found) + " -> " + appName);
         builder.setDeleteIntent(PendingIntent.getBroadcast(c, 0, slide, PendingIntent.FLAG_UPDATE_CURRENT));
         Notification notification = builder.build();
-        NotificationManager notificationManager = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
-        assert notificationManager != null;
         notificationManager.notify(nid, notification);
-        Log.d(TAG, "onFCFounded: end id:" + id);
+        Log.d(TAG, "onFCFounded: end id:" + id + " nid:" + nid);
     }
 
     private static String getProgramNameByPackageName(Context context, String packageName) {
