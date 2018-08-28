@@ -89,7 +89,7 @@ public class Help extends Activity {
                 }
             });
         builder.show();
-        Utils.simpleToast(this, String.format(getString(R.string.help_toast), Utils.getAppVersionName(this, getPackageName()), getString(R.string.help_update_time)), false, false);
+        Utils.simpleToast(this, String.format(getString(R.string.help_toast), Utils.getAppVersionName(this, getPackageName()), BuildConfig.APK_PACK_TIME, getString(R.string.help_update_time)), false, false);
     }
 
     void openURL(String link) {

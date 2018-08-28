@@ -151,11 +151,7 @@ public class FCLogService extends Service implements Runnable {
                             while (Arrays.asList(new String[]{J_SIGNAL[0], N_SIGNAL[0], ANR_SIGNAL[0]}).contains(
                                     new LogObject(line = bufferedReader.readLine()).getTag())) {
                                 if (line.contains(J_PROC_SIGNAL[0])) {
-                                    String pkgNameTmp;
-                                    pkgNameTmp = new LogObject(line).getRaw().substring(J_PROC_SIGNAL[0].length(), new LogObject(line).getRaw().indexOf(J_PROC_SIGNAL[1]));
-                                    if (pkgNameTmp.contains(":"))
-                                        pkgNameTmp = pkgNameTmp.split(":")[0];
-                                    FCLogInfoBridge.setFcPackageName(pkgNameTmp);
+                                    FCLogInfoBridge.setFcPackageName(new LogObject(line).getRaw().substring(J_PROC_SIGNAL[0].length(), new LogObject(line).getRaw().indexOf(J_PROC_SIGNAL[1])));
                                     FCLogInfoBridge.setFcPID(line.subSequence(line.indexOf(J_PROC_SIGNAL[1]) + J_PROC_SIGNAL[1].length(), line.length()).toString());
                                 } else if (line.contains(N_PROC_SIGNAL[0]) && line.contains(N_PROC_SIGNAL[1])) {
                                     String pkgNameTmp = line.subSequence(line.indexOf(N_PROC_SIGNAL[0]) + N_PROC_SIGNAL[0].length(), line.indexOf(N_PROC_SIGNAL[1])).toString();
@@ -170,6 +166,10 @@ public class FCLogService extends Service implements Runnable {
                                     FCLogInfoBridge.setFcPackageName(headerJudge.getRaw().substring(headerJudge.getRaw().indexOf(ANR_PROC_SIGNAL[0]) + ANR_PROC_SIGNAL[0].length()).split(" +")[0]);
                                 }
                             }
+                            //裁剪包名：a.b.c:xxx
+                            String pkgNameCutTmp = FCLogInfoBridge.getFcPackageName();
+                            if (pkgNameCutTmp.contains(":"))
+                                FCLogInfoBridge.setFcPackageName(pkgNameCutTmp.split(":")[0]);
                             if (!this.getClass().getPackage().getName().equals(FCLogInfoBridge.getFcPackageName())) {
                                 Log.v(TAG, "run: new Thread");
                                 new Thread(new Runnable() {
