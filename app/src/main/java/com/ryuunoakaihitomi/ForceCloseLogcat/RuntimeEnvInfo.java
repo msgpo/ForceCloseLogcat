@@ -2,6 +2,7 @@ package com.ryuunoakaihitomi.ForceCloseLogcat;
 
 import android.content.Context;
 import android.os.Build;
+import android.util.Log;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +13,8 @@ import java.util.Objects;
  */
 
 public class RuntimeEnvInfo {
+    private static final String TAG = "RuntimeEnvInfo";
+
     public static String get(Context context) {
         String infoBody = "";
         infoBody += "crash time=" + FCLogInfoBridge.getFcTime() + "\n";
@@ -31,20 +34,18 @@ public class RuntimeEnvInfo {
             infoBody += "cpu abi=" + Build.CPU_ABI + "\n";
             infoBody += "cpu abi2=" + Build.CPU_ABI2 + "\n";
         }
-        infoBody += "display=" + Build.DISPLAY + "\n";
+        infoBody += "display=" + Build.DISPLAY;
         //构建信息原始数据
-        infoBody += "raw build info=" + getRawBuildEnvInfo();
+        Log.i(TAG, getRawBuildEnvInfo());
         return infoBody;
     }
 
     private static String stringArrayToString(String[] in, String dot) {
         StringBuilder out = new StringBuilder();
-        for (int i = 0; i < in.length; i++) {
-            if (i == in.length - 1) {
-                out.append(in[i]);
-            } else {
-                out.append(in[i]).append(dot);
-            }
+        int i = 0;
+        for (String string : in) {
+            i++;
+            out.append(string).append(i == in.length ? "" : dot);
         }
         return out.toString();
     }

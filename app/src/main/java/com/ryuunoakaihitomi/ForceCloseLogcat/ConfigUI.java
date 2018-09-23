@@ -122,9 +122,10 @@ public class ConfigUI extends Activity {
                                             //应用标签
                                             appName[i] = info.applicationInfo.loadLabel(manager).toString();
                                             //包名类别
-                                            appDetails[i] = info.packageName + "\n" + (isSysApp ? getString(R.string.sys_app) : getString(R.string.usr_app));
-                                            appList[i] = info.packageName;
-                                            cfgShow[i] = appListSaver.optBoolean(info.packageName);
+                                            String appPkgName;
+                                            appDetails[i] = (appName[i].equals(appPkgName = info.packageName) ? "" : appPkgName + "\n") + (isSysApp ? getString(R.string.sys_app) : getString(R.string.usr_app));
+                                            appList[i] = appPkgName;
+                                            cfgShow[i] = appListSaver.optBoolean(appPkgName);
                                         }
                                         alertDialogBuilder.setMultiChoiceItems(appName, cfgShow, new DialogInterface.OnMultiChoiceClickListener() {
                                             @Override

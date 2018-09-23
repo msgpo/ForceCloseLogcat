@@ -277,7 +277,7 @@ public class FCLogService extends Service implements Runnable {
             //..-. -.-.
             vibrator.vibrate(new long[]{0, DIT/*1*/, DIT, DIT/*2*/, DIT, DAH/*3*/, DIT, DIT/*4*/, DAH/* */, DAH/*5*/, DIT, DIT/*6*/, DIT, DAH/*7*/, DIT, DIT/*8*/}, -1);
         } else
-            Log.e(TAG, "震える: Vibrator not available!(真っ沈黙モード)");
+            Log.e(TAG, "震える: Vibrator not available!");
     }
 
     @SuppressWarnings("ConstantConditions")
