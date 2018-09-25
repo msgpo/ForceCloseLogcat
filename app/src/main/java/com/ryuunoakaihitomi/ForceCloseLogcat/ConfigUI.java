@@ -102,7 +102,7 @@ public class ConfigUI extends Activity {
                                 Log.i(TAG, "run: appCount:" + appCount + "+1");
                                 final String[] appName = new String[appCount], appList = new String[appCount], appDetails = new String[appCount];
                                 boolean[] cfgShow = new boolean[appCount];
-                                for (int i = 0; i < infos.size(); i++) {
+                                for (int i = 0; i < appCount; i++) {
                                     PackageInfo info = infos.get(i);
                                     boolean isSysApp = (info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
                                     try {
