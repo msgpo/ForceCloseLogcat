@@ -43,7 +43,7 @@ public class LogViewer extends Activity {
                 envInfo + "\n" +
                 separator + getString(R.string.log_body) + "\n" +
                 logBody;
-        AlertDialog.Builder builder = new AlertDialog.Builder(LogViewer.this, AlertDialog.THEME_DEVICE_DEFAULT_DARK)
+        AlertDialog.Builder builder = new AlertDialog.Builder(LogViewer.this, Utils.getDarkDialogTheme())
                 .setTitle(R.string.log_reader);
         //Android P
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O_MR1) {

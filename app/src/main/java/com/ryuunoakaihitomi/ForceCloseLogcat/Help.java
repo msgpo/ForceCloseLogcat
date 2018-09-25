@@ -14,8 +14,6 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import static android.app.AlertDialog.THEME_DEVICE_DEFAULT_DARK;
-
 /**
  * 活动：帮助
  */
@@ -48,7 +46,7 @@ public class Help extends Activity {
         super.onCreate(savedInstanceState);
         Utils.transparentStatusBar(this);
         Builder builder =
-                new Builder(Help.this, THEME_DEVICE_DEFAULT_DARK)
+                new Builder(Help.this, Utils.getDarkDialogTheme())
                         .setTitle(R.string.help)
                         .setMessage(inputStream2String(getResources().openRawResource(R.raw.help_body)))
                         .setPositiveButton(R.string.donate, new OnClickListener() {

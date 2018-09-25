@@ -42,4 +42,5 @@
     <string name="foreground_srv_channel_name">前台服务</string>
     <string name="crash_report_channel_name">崩溃通知</string>
     <string name="developer_option">开发者选项</string>
+    <string name="executing_step_n">正在加载,筛选,和排序应用列表及设置选项…</string>
 </resources>

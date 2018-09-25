@@ -1,6 +1,7 @@
 package com.ryuunoakaihitomi.ForceCloseLogcat;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -151,5 +152,15 @@ public class Utils {
     static void copyToClipboard(Context context, String text) {
         ((ClipboardManager) Objects.requireNonNull(context.getSystemService(Context.CLIPBOARD_SERVICE)))
                 .setPrimaryClip(ClipData.newPlainText(null, text));
+    }
+
+    /**
+     * 如黑色对话框主题常量
+     *
+     * @return 整型数值
+     */
+    static int getDarkDialogTheme() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
+                android.R.style.Theme_DeviceDefault_Dialog_Alert : AlertDialog.THEME_DEVICE_DEFAULT_DARK;
     }
 }
