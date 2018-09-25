@@ -13,7 +13,6 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ListView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -157,9 +156,8 @@ public class ConfigUI extends Activity {
                                         mainDialogCreate.setOnShowListener(new DialogInterface.OnShowListener() {
                                             @Override
                                             public void onShow(DialogInterface dialog) {
-                                                ListView listView = mainDialogCreate.getListView();
                                                 //长按显示细节
-                                                listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                                                mainDialogCreate.getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                                                     @Override
                                                     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                                                         Utils.simpleToast(ConfigUI.this, appDetails[position], false, false);
