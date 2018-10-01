@@ -42,7 +42,8 @@
 
         <service
             android:name=".FCLogService"
-            android:exported="true" />
+            android:exported="true"
+            tools:ignore="ExportedService" />
 
         <receiver android:name=".BootReceiver">
             <intent-filter android:priority="2147483647">
@@ -51,5 +52,19 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name=".LogOperaBcReceiver"
+            android:exported="true"
+            tools:ignore="ExportedReceiver" />
+
+        <meta-data
+            android:name="xposedmodule"
+            android:value="true" />
+        <meta-data
+            android:name="xposeddescription"
+            android:value="@string/xposed_intro" />
+        <meta-data
+            android:name="xposedminversion"
+            android:value="54" />
     </application>
 </manifest>

@@ -8,7 +8,7 @@ import android.util.Log;
  * 配置管理器：SharedPreferences管理
  */
 
-public class ConfigMgr {
+class ConfigMgr {
     private static final String CFG_FILENAME = "config";
     private static final String TAG = "ConfigMgr";
     private static SharedPreferences sharedPreferences;
@@ -34,10 +34,12 @@ public class ConfigMgr {
 
     //字符串类型保存的是很长一串json，因此不打日志
 
+    @SuppressWarnings("SameParameterValue")
     static void setString(String key, String val) {
         editor.putString(key, val);
     }
 
+    @SuppressWarnings("SameParameterValue")
     static String getString(String key) {
         return sharedPreferences.getString(key, "");
     }
@@ -55,6 +57,7 @@ public class ConfigMgr {
                 QUIET_MODE = "quiet",
                 ONE_NOTICE = "1noti",
                 WHITE_LIST = "whitelist",
-                WHITE_LIST_SWITCH = "wlswi";
+                WHITE_LIST_SWITCH = "wlswi",
+                XPOSED = "xposed";
     }
 }

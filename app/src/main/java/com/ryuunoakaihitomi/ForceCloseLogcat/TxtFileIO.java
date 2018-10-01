@@ -10,7 +10,7 @@ import java.io.IOException;
  */
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
-public class TxtFileIO {
+class TxtFileIO {
 
     //删
     static void D(String path) {
@@ -69,5 +69,4 @@ public class TxtFileIO {
             f.delete();
         }
     }
-
 }

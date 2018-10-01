@@ -32,6 +32,18 @@ public class ConfigUI extends Activity {
     private static final String TAG = "ConfigUI";
     private AlertDialog dialog;
 
+    static boolean isXposedActive() {
+        return false;
+    }
+
+    //防止窗体泄露
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        dialog.dismiss();
+        dialog = null;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,11 +57,12 @@ public class ConfigUI extends Activity {
         alertDialogBuilder = new AlertDialog.Builder(this, Utils.getDarkDialogTheme())
                 .setTitle(R.string.settings)
                 .setMultiChoiceItems(new String[]
-                        {getString(R.string.do_not_auto_run), getString(R.string.quiet_mode), getString(R.string.one_noti), getString(R.string.white_list)}, new boolean[]{
+                        {getString(R.string.do_not_auto_run), getString(R.string.quiet_mode), getString(R.string.one_noti), getString(R.string.white_list), getString(R.string.xposed_switch)}, new boolean[]{
                         ConfigMgr.getBoolean(ConfigMgr.Options.NO_AUTO_RUN),
                         ConfigMgr.getBoolean(ConfigMgr.Options.QUIET_MODE),
                         ConfigMgr.getBoolean(ConfigMgr.Options.ONE_NOTICE),
                         ConfigMgr.getBoolean(ConfigMgr.Options.WHITE_LIST_SWITCH),
+                        ConfigMgr.getBoolean(ConfigMgr.Options.XPOSED)
                 }, new DialogInterface.OnMultiChoiceClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which, boolean isChecked) {
@@ -65,6 +78,15 @@ public class ConfigUI extends Activity {
                                 break;
                             case 3:
                                 ConfigMgr.setBoolean(ConfigMgr.Options.WHITE_LIST_SWITCH, isChecked);
+                                break;
+                            case 4:
+                                if (isXposedActive())
+                                    ConfigMgr.setBoolean(ConfigMgr.Options.XPOSED, isChecked);
+                                else {
+                                    ConfigMgr.setBoolean(ConfigMgr.Options.XPOSED, false);
+                                    if (isChecked)
+                                        Utils.simpleToast(ConfigUI.this, getString(R.string.xposed_offline), false, true);
+                                }
                                 break;
                         }
                     }
@@ -204,13 +226,5 @@ public class ConfigUI extends Activity {
                 throw new Error("MyCrash Test");
             }
         });
-    }
-
-    //防止窗体泄露
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        dialog.dismiss();
-        dialog = null;
     }
 }

@@ -16,6 +16,7 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -50,10 +51,107 @@ public class FCLogService extends Service implements Runnable {
         return null;
     }
 
+    @SuppressWarnings({"ConstantConditions", "NonAsciiCharacters"})
+    static void 震える(Context context) {
+        Vibrator vibrator = (Vibrator) context.getSystemService(VIBRATOR_SERVICE);
+        if (vibrator.hasVibrator()) {
+            final int DIT = 30, DAH = DIT * 3;
+            //..-. -.-.
+            vibrator.vibrate(new long[]{0, DIT/*1*/, DIT, DIT/*2*/, DIT, DAH/*3*/, DIT, DIT/*4*/, DAH/* */, DAH/*5*/, DIT, DIT/*6*/, DIT, DAH/*7*/, DIT, DIT/*8*/}, -1);
+        } else
+            Log.e(TAG, "震える: Vibrator not available!");
+    }
+
+    /**
+     * 检查是否获得root权限
+     *
+     * @return 如已获得root权限，返回为真，反之为假
+     */
+    private static synchronized boolean isRoot() {
+        Process process = null;
+        try {
+            process = Runtime.getRuntime().exec("su");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        assert process != null;
+        try (DataOutputStream os = new DataOutputStream(process.getOutputStream())) {
+            os.writeBytes("exit\n");
+            os.flush();
+            int exitValue = process.waitFor();
+            return exitValue == 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                process.destroyForcibly();
+            else
+                process.destroy();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        unregisterReceiver(tickReceiver);
+        LogOperaBcReceiver.unreg(this);
+        isAlive = false;
+        stopForeground(true);
+        super.onDestroy();
+    }
+
+    /**
+     * 执行shell
+     *
+     * @param command 所执行的命令
+     * @param isRoot  是否需要root
+     * @return 标准输入流
+     */
+    private static synchronized String cmd(String command, boolean isRoot) {
+        StringBuilder ret = new StringBuilder();
+        try {
+            Process p;
+            if (isRoot) {
+                p = Runtime.getRuntime().exec("su");
+            } else {
+                p = Runtime.getRuntime().exec("sh");
+            }
+            DataOutputStream d = new DataOutputStream(p.getOutputStream());
+            d.writeBytes(command + "\n");
+            d.writeBytes("exit\n");
+            d.flush();
+            try {
+                System.out.println("cmd: \"" + command + "\" exitValue=" + p.waitFor());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(p.getInputStream());
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(bufferedInputStream));
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                ret.append(line).append("\n");
+            }
+            p.getErrorStream().close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return ret.toString();
+    }
+
+    //检查日志读取权限
+    boolean checkLogPerm() {
+        int intRet;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            intRet = checkSelfPermission(Manifest.permission.READ_LOGS);
+        else
+            intRet = checkPermission(Manifest.permission.READ_LOGS, android.os.Process.myPid(), android.os.Process.myUid());
+        return intRet == PackageManager.PERMISSION_GRANTED;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
-        isRoot = Utils.isRoot();
+        isRoot = isRoot();
         boolean isReadLogPermissionGranted = checkLogPerm();
         isAlive = true;
         cleanLog();
@@ -63,7 +161,7 @@ public class FCLogService extends Service implements Runnable {
             if (!isRoot)
                 onPermissionDenied();
             else
-                Utils.cmd("pm grant " + getPackageName() + " android.permission.READ_LOGS", true);
+                cmd("pm grant " + getPackageName() + " android.permission.READ_LOGS", true);
         startForeground(NOTICE_ID, NoticeBar.serviceStart(this));
         LogOperaBcReceiver.reg(this);
         Thread thread = new Thread(this);
@@ -73,6 +171,36 @@ public class FCLogService extends Service implements Runnable {
         registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
         if (isAlive)
             Utils.simpleToast(this, getString(R.string.service_running), false, false);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null && KILL_SIGNAL.equals(intent.getAction())) {
+            ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancelAll();
+            stopSelf();
+            new Thread() {
+                @Override
+                public void run() {
+                    System.exit(0);
+                }
+            }.start();
+            return START_NOT_STICKY;
+        }
+        return START_STICKY;
+    }
+
+    void onPermissionDenied() {
+        isAlive = false;
+        Log.e(TAG, "onCreate: I do not have permission to read the system log.");
+        Utils.simpleToast(this, getString(R.string.no_read_log_perm), true, true);
+        stopSelf();
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        Log.i(TAG, "onTrimMemory: level:" + level);
+        System.gc();
     }
 
     @Override
@@ -126,10 +254,10 @@ public class FCLogService extends Service implements Runnable {
                     if (!line.contains(LOG_BUFFER_DIVIDER)) {
                         FCLogInfoBridge.log = line;
                         final LogObject headerJudge = new LogObject(line);
-                        if ((J_SIGNAL[0].equals(headerJudge.getTag())
+                        boolean isJavaFCCrash = (J_SIGNAL[0].equals(headerJudge.getTag())
                                 && J_SIGNAL[1].equals(headerJudge.getLevel())
-                                && headerJudge.getRaw().contains(J_SIGNAL[2]))
-                                ||
+                                && headerJudge.getRaw().contains(J_SIGNAL[2]));
+                        if (isJavaFCCrash ||
                                 (N_SIGNAL[0].equals(headerJudge.getTag())
                                         //Android 4.4发现是I等级
                                         && (N_SIGNAL[1].equals(headerJudge.getLevel()) || "I".equals(headerJudge.getLevel()))
@@ -147,6 +275,14 @@ public class FCLogService extends Service implements Runnable {
                                 //对应的标签为"Android 系统"
                                 FCLogInfoBridge.setFcPackageName("android");
                                 FCLogInfoBridge.setFcPID(String.valueOf(Build.VERSION.SDK_INT));
+                            } else {
+                                if (isJavaFCCrash) {
+                                    //如果用xposed，JVM FC crash不再需要操心
+                                    if (ConfigUI.isXposedActive() && ConfigMgr.getBoolean(ConfigMgr.Options.XPOSED)) {
+                                        Log.d(TAG, "run: Exit for XposedHookPlugin.");
+                                        continue;
+                                    }
+                                }
                             }
                             while (Arrays.asList(new String[]{J_SIGNAL[0], N_SIGNAL[0], ANR_SIGNAL[0]}).contains(
                                     new LogObject(line = bufferedReader.readLine()).getTag())) {
@@ -204,7 +340,7 @@ public class FCLogService extends Service implements Runnable {
                                                 logFilter = "ActivityManager:E";
                                             Log.i(TAG, "run: set logcat filter:" + logFilter);
                                             final String LOG_FILTER_OUTPUT_CMD = "logcat -v raw -d -s " + logFilter;
-                                            TxtFileIO.W(path, Utils.cmd(LOG_FILTER_OUTPUT_CMD, Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
+                                            TxtFileIO.W(path, cmd(LOG_FILTER_OUTPUT_CMD, Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
                                                     .replaceAll(LOG_BUFFER_DIVIDER + ".*\n", "").replace(N_SIGNAL[2] + System.getProperty("line.separator"), ""));
                                             long logLength = new File(path).length();
                                             Log.d(TAG, "run: logLength:" + logLength);
@@ -212,7 +348,7 @@ public class FCLogService extends Service implements Runnable {
                                             if (!isQuietModeEnable)
                                                 NoticeBar.onFCFounded(FCLogService.this);
                                             else
-                                                震える();
+                                                震える(FCLogService.this);
                                         }
                                         Log.i(TAG, "run: A Workflow in " + (System.currentTimeMillis() - start) + "ms");
                                         //不清除日志在短时间发生多次崩溃时将会重复输出，但极不方便调试
@@ -235,15 +371,6 @@ public class FCLogService extends Service implements Runnable {
         stopSelf();
     }
 
-    @Override
-    public void onDestroy() {
-        unregisterReceiver(tickReceiver);
-        LogOperaBcReceiver.unreg(this);
-        isAlive = false;
-        stopForeground(true);
-        super.onDestroy();
-    }
-
     //清除日志
     void cleanLog() {
         Log.d(TAG, "cleanLog: start");
@@ -251,62 +378,11 @@ public class FCLogService extends Service implements Runnable {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
             CLEAN_LOG_CMD = "logcat -b all -c";
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
-            Utils.cmd(CLEAN_LOG_CMD, true);
+            cmd(CLEAN_LOG_CMD, true);
         else if (checkLogPerm())
-            Utils.cmd(CLEAN_LOG_CMD, false);
+            cmd(CLEAN_LOG_CMD, false);
         else if (isRoot)
-            Utils.cmd(CLEAN_LOG_CMD, true);
+            cmd(CLEAN_LOG_CMD, true);
         Log.d(TAG, "cleanLog: end");
-    }
-
-    //检查日志读取权限
-    boolean checkLogPerm() {
-        int intRet;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            intRet = checkSelfPermission(Manifest.permission.READ_LOGS);
-        else
-            intRet = checkPermission(Manifest.permission.READ_LOGS, android.os.Process.myPid(), android.os.Process.myUid());
-        return intRet == PackageManager.PERMISSION_GRANTED;
-    }
-
-    @SuppressWarnings({"ConstantConditions", "NonAsciiCharacters"})
-    void 震える() {
-        Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-        if (vibrator.hasVibrator()) {
-            final int DIT = 30, DAH = DIT * 3;
-            //..-. -.-.
-            vibrator.vibrate(new long[]{0, DIT/*1*/, DIT, DIT/*2*/, DIT, DAH/*3*/, DIT, DIT/*4*/, DAH/* */, DAH/*5*/, DIT, DIT/*6*/, DIT, DAH/*7*/, DIT, DIT/*8*/}, -1);
-        } else
-            Log.e(TAG, "震える: Vibrator not available!");
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null && KILL_SIGNAL.equals(intent.getAction())) {
-            ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancelAll();
-            stopSelf();
-            new Thread() {
-                @Override
-                public void run() {
-                    System.exit(0);
-                }
-            }.start();
-            return START_NOT_STICKY;
-        }
-        return START_STICKY;
-    }
-
-    void onPermissionDenied() {
-        isAlive = false;
-        Log.e(TAG, "onCreate: I do not have permission to read the system log.");
-        Utils.simpleToast(this, getString(R.string.no_read_log_perm), true, true);
-        stopSelf();
-    }
-
-    @Override
-    public void onTrimMemory(int level) {
-        Log.i(TAG, "onTrimMemory: level:" + level);
-        System.gc();
     }
 }

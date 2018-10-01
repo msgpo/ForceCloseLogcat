@@ -12,10 +12,10 @@ import java.util.Objects;
  * 环境信息记录
  */
 
-public class RuntimeEnvInfo {
+class RuntimeEnvInfo {
     private static final String TAG = "RuntimeEnvInfo";
 
-    public static String get(Context context) {
+    static String get(Context context) {
         String infoBody = "";
         infoBody += "crash time=" + FCLogInfoBridge.getFcTime() + "\n";
         infoBody += "model=" + Build.MODEL + "\n";

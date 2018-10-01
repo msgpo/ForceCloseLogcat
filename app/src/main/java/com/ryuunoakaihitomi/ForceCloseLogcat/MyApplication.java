@@ -3,7 +3,9 @@ package com.ryuunoakaihitomi.ForceCloseLogcat;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.os.Process;
+import android.os.StrictMode;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -20,12 +22,39 @@ public class MyApplication extends Application implements Thread.UncaughtExcepti
 
     @Override
     public void onCreate() {
+        //严格模式
+        StrictMode.ThreadPolicy threadPolicy = new StrictMode.ThreadPolicy.Builder()
+                .detectAll()
+                .penaltyLog()
+                .build();
+        StrictMode.VmPolicy vmPolicy = new StrictMode.VmPolicy.Builder()
+                .detectAll()
+                .penaltyLog()
+                .build();
+        if (isDebuggable()) {
+            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder(threadPolicy)
+                    .penaltyDeath()
+                    .penaltyDialog()
+                    .penaltyFlashScreen()
+                    .build());
+            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder(vmPolicy)
+                    .penaltyDeath()
+                    .build());
+        } else {
+            StrictMode.setThreadPolicy(threadPolicy);
+            StrictMode.setVmPolicy(vmPolicy);
+        }
         super.onCreate();
         Log.i(TAG, "onCreate: PID:" + Process.myPid());
         Thread.setDefaultUncaughtExceptionHandler(this);
         context = getApplicationContext();
-        //noinspection ResultOfMethodCallIgnored
-        new File(FCLogService.LOG_DIR).mkdirs();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //noinspection ResultOfMethodCallIgnored
+                new File(FCLogService.LOG_DIR).mkdirs();
+            }
+        }).start();
     }
 
     //Chash监听
@@ -38,7 +67,17 @@ public class MyApplication extends Application implements Thread.UncaughtExcepti
         TxtFileIO.W(FCLogService.LOG_DIR + "/" + FCLogInfoBridge.getFcTime() + "_MyCrash.log",
                 "EnvInfo:\n" + RuntimeEnvInfo.get(context) + "\nFCLog:\n"
                         + Log.getStackTraceString(e) + "\nFinalLog:\n" + FCLogInfoBridge.log);
-        SystemClock.sleep(CRASH_UI_FREEZE_DELAY);
+        if (isDebuggable())
+            SystemClock.sleep(CRASH_UI_FREEZE_DELAY);
         Process.killProcess(Process.myPid());
+    }
+
+    /**
+     * 判断本应用是否为debug包
+     *
+     * @return boolean
+     */
+    boolean isDebuggable() {
+        return (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
     }
 }

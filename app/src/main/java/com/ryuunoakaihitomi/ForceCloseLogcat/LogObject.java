@@ -5,6 +5,7 @@ package com.ryuunoakaihitomi.ForceCloseLogcat;
  * 日志示例："04-30 04:37:25.233  1486  1486 I chatty  : uid=1000 system_server expire 1 line"
  */
 
+@SuppressWarnings("WeakerAccess")
 public class LogObject {
     @SuppressWarnings("FieldCanBeLocal")
     private final String

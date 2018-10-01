@@ -14,84 +14,13 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Objects;
 
 /**
  * 其他工具类：非要在两个类中使用的共有方法会在这里
  */
 
-public class Utils {
-    /**
-     * 检查是否获得root权限
-     *
-     * @return 如已获得root权限，返回为真，反之为假
-     */
-    public static synchronized boolean isRoot() {
-        Process process = null;
-        DataOutputStream os = null;
-        try {
-            process = Runtime.getRuntime().exec("su");
-            os = new DataOutputStream(process.getOutputStream());
-            os.writeBytes("exit\n");
-            os.flush();
-            int exitValue = process.waitFor();
-            return exitValue == 0;
-        } catch (Exception e) {
-            return false;
-        } finally {
-            try {
-                if (os != null) {
-                    os.close();
-                }
-                assert process != null;
-                process.destroy();
-            } catch (Exception ignored) {
-            }
-        }
-    }
-
-    /**
-     * 执行shell
-     *
-     * @param command 所执行的命令
-     * @param isRoot  是否需要root
-     * @return 标准输入流
-     */
-    static synchronized String cmd(String command, boolean isRoot) {
-        StringBuilder ret = new StringBuilder("");
-        try {
-            Process p;
-            if (isRoot) {
-                p = Runtime.getRuntime().exec("su");
-            } else {
-                p = Runtime.getRuntime().exec("sh");
-            }
-            DataOutputStream d = new DataOutputStream(p.getOutputStream());
-            d.writeBytes(command + "\n");
-            d.writeBytes("exit\n");
-            d.flush();
-            try {
-                System.out.println("cmd: \"" + command + "\" exitValue=" + p.waitFor());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            BufferedInputStream bufferedInputStream = new BufferedInputStream(p.getInputStream());
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(bufferedInputStream));
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                ret.append(line).append("\n");
-            }
-            p.getErrorStream().close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return ret.toString();
-    }
+class Utils {
 
     /**
      * 模板Toast
@@ -101,7 +30,7 @@ public class Utils {
      * @param islong   是否是长toast
      * @param isCenter 是否显示在中心位置
      */
-    public static void simpleToast(Context context, String text, boolean islong, boolean isCenter) {
+    static void simpleToast(Context context, String text, boolean islong, boolean isCenter) {
         Toast toast = Toast.makeText(context, text, islong ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT);
         if (isCenter) toast.setGravity(Gravity.CENTER, 0, 0);
         toast.show();
@@ -112,7 +41,7 @@ public class Utils {
      *
      * @param activity 要渲染的活动
      */
-    public static void transparentStatusBar(Activity activity) {
+    static void transparentStatusBar(Activity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window w = activity.getWindow();
             w.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);

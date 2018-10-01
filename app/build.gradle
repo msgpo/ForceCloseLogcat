@@ -6,8 +6,8 @@ android {
         applicationId "com.ryuunoakaihitomi.ForceCloseLogcat"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 53
-        versionName "6.0.8"
+        versionCode 54
+        versionName "6.0.8.3"
         buildConfigField("String", "APK_PACK_TIME", "\"" + new Date() + "\"")
     }
     buildTypes {
@@ -20,6 +20,7 @@ android {
 
 dependencies {
     //implementation fileTree(dir: 'libs', include: ['*.jar'])
+    compileOnly 'de.robv.android.xposed:api:82'
 }
 
 android.applicationVariants.all { variant ->

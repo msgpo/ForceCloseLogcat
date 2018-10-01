@@ -24,7 +24,7 @@ import java.util.Objects;
  * 通知管理
  */
 
-public class NoticeBar {
+class NoticeBar {
     private static final String TAG = "NoticeBar";
     private static int id = Integer.MIN_VALUE;
 
@@ -36,7 +36,7 @@ public class NoticeBar {
                 .putExtra(LogViewer.EXTAG_NOTICE_ID, id);
     }
 
-    public static Notification serviceStart(Context c) {
+    static Notification serviceStart(Context c) {
         String fsChannelName = c.getString(R.string.foreground_srv_channel_name);
         String fsChannelId = "FClog.serviceStart";
         Notification.Builder builder;
@@ -68,7 +68,7 @@ public class NoticeBar {
         return builder.build();
     }
 
-    public static void onFCFounded(Context c) {
+    static void onFCFounded(Context c) {
         String crChannelName = c.getString(R.string.crash_report_channel_name);
         String crChannelId = "FClog.onFCFounded";
         Notification.BigTextStyle bigTextStyle = new Notification.BigTextStyle();
