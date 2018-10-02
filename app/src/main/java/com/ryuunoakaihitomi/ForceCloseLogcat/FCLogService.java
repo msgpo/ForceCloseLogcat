@@ -74,7 +74,8 @@ public class FCLogService extends Service implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        assert process != null;
+        if (process == null)
+            return false;
         try (DataOutputStream os = new DataOutputStream(process.getOutputStream())) {
             os.writeBytes("exit\n");
             os.flush();
