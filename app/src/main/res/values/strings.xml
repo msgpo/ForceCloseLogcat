@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="app_name">应用崩溃日志记录器</string>
     <string name="service_name">日志读取服务</string>
     <string name="running">运行中…</string>

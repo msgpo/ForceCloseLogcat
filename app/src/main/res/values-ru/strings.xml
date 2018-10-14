@@ -1,0 +1,47 @@
+<!--https://github.com/ryuunoakaihitomi/ForceCloseLogcat/issues/4--><!--Russian Translation Author: https://github.com/Washerron-->
+<resources>
+    <string name="app_name">Android Application Crash</string>
+    <string name="service_name">Сервис чтения логов</string>
+    <string name="running">Операция…</string>
+    <string name="fcnoti_subtext">Из %s(%s)</string>
+    <string name="share">Поделиться</string>
+    <string name="copy">Копировать</string>
+    <string name="delete">Удалить</string>
+    <string name="send_log_to_developer">Отправлять содержимое журнала разработчику</string>
+    <string name="settings">Установить</string>
+    <string name="do_not_auto_run">Загрузка не запускается автоматически</string>
+    <string name="quiet_mode">Тихий режим</string>
+    <string name="one_noti">Единое уведомление</string>
+    <string name="white_list">Белый список</string>
+    <string name="sys_app">Системное приложение</string>
+    <string name="usr_app">Пользовательское приложение</string>
+    <string name="save">Сохранить</string>
+    <string name="help">Помощь</string>
+    <string name="white_list_editor">Редактор белого списка</string>
+    <string name="donate">Пожертвовать</string>
+    <string name="dl_link">Официальная ссылка для скачивания</string>
+    <string name="log_reader">Читать лог</string>
+    <string name="env_info">Экологическая информация</string>
+    <string name="log_body">Содержимое лога</string>
+    <string name="log_path">Адрес файла лога</string>
+    <string name="copied_info">Скопировано в буфер обмена</string>
+    <string name="start_service">Начать сервис</string>
+    <string name="welcome">Вы, кажется, используете это приложение в первый раз. Надеюсь, вы не против смотреть инструкции по использованию, прежде чем использовать его.</string>
+    <string name="processing_please_wait">Обработка, пожалуйста, подождите …</string>
+    <string name="kill_service">Остановить сервис</string>
+    <string name="no_read_log_perm">Служба не работает без разрешения на чтение системного журнала !!!</string>
+    <string name="saved">Сохраненный</string>
+    <string name="help_toast">Версия приложения: %s\nВремя упаковки: %s\nДата обновления справки: %s</string>
+    <string name="help_update_time">20181001</string>
+    <string name="service_running">Служба запускается</string>
+    <string name="copy_adb_cmd">Копировать команду ADB</string>
+    <string name="need_wes_perm_notice">Для некоторых журналов могут потребоваться разрешения на хранение</string>
+    <string name="battery_opti_warn">Не игнорируйте оптимизацию батареи, возможно, не гарантирует эффективность этого приложения, когда экран выключен.</string>
+    <string name="null_log_body">Журнал пуст…</string>
+    <string name="foreground_srv_channel_name">Обслуживание номеров</string>
+    <string name="crash_report_channel_name">Уведомление о сбоях</string>
+    <string name="developer_option">Возможности разработчика</string>
+    <string name="executing_step_n">Загрузка, фильтрация и сортировка списков и параметров приложений …</string>
+    <string name="xposed_switch">Включить модуль xposed</string>
+    <string name="xposed_offline">Модуль xposed не включен в менеджере!</string>
+</resources>

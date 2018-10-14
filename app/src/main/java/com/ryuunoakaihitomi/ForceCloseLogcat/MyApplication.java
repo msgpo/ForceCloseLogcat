@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Process;
 import android.os.StrictMode;
 import android.os.SystemClock;
@@ -27,25 +29,18 @@ public class MyApplication extends Application implements Thread.UncaughtExcepti
                 .detectAll()
                 .penaltyLog()
                 .build();
-        StrictMode.VmPolicy vmPolicy = new StrictMode.VmPolicy.Builder()
-                .detectAll()
-                .penaltyLog()
-                .build();
-        if (isDebuggable()) {
+        if (isDebuggable())
             StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder(threadPolicy)
-                    .penaltyDeath()
                     .penaltyDialog()
                     .penaltyFlashScreen()
                     .build());
-            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder(vmPolicy)
-                    .penaltyDeath()
-                    .build());
-        } else {
-            StrictMode.setThreadPolicy(threadPolicy);
-            StrictMode.setVmPolicy(vmPolicy);
-        }
+        StrictMode.setThreadPolicy(threadPolicy);
+        StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+                .detectAll()
+                .penaltyLog()
+                .build());
         super.onCreate();
-        Log.i(TAG, "onCreate: PID:" + Process.myPid());
+        Log.i(TAG, "onCreate: PID:" + Process.myPid() + " LANG=" + getLanguage());
         Thread.setDefaultUncaughtExceptionHandler(this);
         context = getApplicationContext();
         new Thread(new Runnable() {
@@ -79,5 +74,14 @@ public class MyApplication extends Application implements Thread.UncaughtExcepti
      */
     boolean isDebuggable() {
         return (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+    }
+
+    String getLanguage() {
+        Configuration configuration = getApplicationContext().getResources().getConfiguration();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            return configuration.getLocales().get(0).getLanguage();
+        else
+            //noinspection deprecation
+            return configuration.locale.getLanguage();
     }
 }
