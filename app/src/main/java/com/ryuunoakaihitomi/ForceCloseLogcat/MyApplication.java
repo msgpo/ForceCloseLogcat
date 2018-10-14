@@ -76,6 +76,7 @@ public class MyApplication extends Application implements Thread.UncaughtExcepti
         return (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
     }
 
+    //获取语言类型字串
     String getLanguage() {
         Configuration configuration = getApplicationContext().getResources().getConfiguration();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
