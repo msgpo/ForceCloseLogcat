@@ -48,6 +48,7 @@ class NoticeBar {
             builder.setBadgeIconType(Notification.BADGE_ICON_SMALL);
         } else
             builder = new Notification.Builder(c);
+        builder.setNumber(0);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
             builder.setTicker(c.getString(R.string.service_name) + c.getString(R.string.running));
         builder
@@ -103,7 +104,7 @@ class NoticeBar {
         else {
             try {
                 Drawable icon = c.getPackageManager().getApplicationIcon(FCLogInfoBridge.getFcPackageName());
-                if (icon instanceof BitmapDrawable)
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || icon instanceof BitmapDrawable)
                     builder.setLargeIcon(((BitmapDrawable) icon).getBitmap());
                 else {
                     //AdaptiveIconDrawable?
@@ -113,9 +114,8 @@ class NoticeBar {
                     icon.draw(canvas);
                     builder.setLargeIcon(bitmap);
                 }
-            } catch (PackageManager.NameNotFoundException e) {
+            } catch (PackageManager.NameNotFoundException ignored) {
                 //不可能转到这个逻辑
-                Log.e(TAG, "onFCFounded: IMPOSSIBLE", e);
             }
         }
         builder

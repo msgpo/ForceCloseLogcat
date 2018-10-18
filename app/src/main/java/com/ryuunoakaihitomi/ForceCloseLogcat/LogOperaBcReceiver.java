@@ -32,13 +32,13 @@ public class LogOperaBcReceiver extends BroadcastReceiver {
     private static final String TAG = "LogOperaBcReceiver";
     static String logPath, envInfo;
     private static final String header = LogOperaBcReceiver.class.getPackage().getName() + ".";
-    static String
+    final static String
             EXACT_COPY = header + "copy",
             EXACT_SHARE = header + "share",
             EXACT_DELETE = header + "delete",
             EXACT_SLIDE = header + "slide";
-    private static String[] actions = {EXACT_COPY, EXACT_DELETE, EXACT_SHARE, EXACT_SLIDE};
-    private static BroadcastReceiver[] broadcastReceivers = {
+    private static final String[] actions = {EXACT_COPY, EXACT_DELETE, EXACT_SHARE, EXACT_SLIDE};
+    private static final BroadcastReceiver[] broadcastReceivers = {
             new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {

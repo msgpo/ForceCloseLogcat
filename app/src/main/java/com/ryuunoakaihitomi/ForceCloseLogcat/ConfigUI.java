@@ -28,10 +28,11 @@ import java.util.Locale;
  */
 
 public class ConfigUI extends Activity {
-    AlertDialog.Builder alertDialogBuilder;
+    private AlertDialog.Builder alertDialogBuilder;
     private static final String TAG = "ConfigUI";
     private AlertDialog dialog;
 
+    @SuppressWarnings("SameReturnValue")
     static boolean isXposedActive() {
         return false;
     }

@@ -24,8 +24,8 @@ public class LogViewer extends Activity {
             EXTAG_ENVINFO = "envinfo",
             EXTAG_NOTICE_ID = "noti_id";
     private static final String TAG = "LogViewer";
-    String path, envInfo;
-    AlertDialog dialog;
+    private String path, envInfo;
+    private AlertDialog dialog;
 
     @SuppressWarnings("JavaReflectionMemberAccess")
     @Override

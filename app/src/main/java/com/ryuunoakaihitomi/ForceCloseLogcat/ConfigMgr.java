@@ -8,6 +8,7 @@ import android.util.Log;
  * 配置管理器：SharedPreferences管理
  */
 
+@SuppressWarnings("CanBeFinal")
 class ConfigMgr {
     private static final String CFG_FILENAME = "config";
     private static final String TAG = "ConfigMgr";

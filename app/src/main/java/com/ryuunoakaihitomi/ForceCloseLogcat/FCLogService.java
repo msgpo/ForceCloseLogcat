@@ -33,10 +33,10 @@ public class FCLogService extends Service implements Runnable {
     @SuppressWarnings("ConstantConditions")
     static final String LOG_DIR = MyApplication.getContext().getExternalFilesDir("FClog").getPath();
     static final String KILL_SIGNAL = "killAction";
-    static final int NOTICE_ID = 1989;
+    private static final int NOTICE_ID = 1989;
     private static final String TAG = "FCLogService";
     //分钟接收器：检查权限
-    BroadcastReceiver tickReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver tickReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             isTickReceived = true;
@@ -140,7 +140,7 @@ public class FCLogService extends Service implements Runnable {
     }
 
     //检查日志读取权限
-    boolean checkLogPerm() {
+    private boolean checkLogPerm() {
         int intRet;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             intRet = checkSelfPermission(Manifest.permission.READ_LOGS);
@@ -191,7 +191,7 @@ public class FCLogService extends Service implements Runnable {
         return START_STICKY;
     }
 
-    void onPermissionDenied() {
+    private void onPermissionDenied() {
         isAlive = false;
         Log.e(TAG, "onCreate: I do not have permission to read the system log.");
         Utils.simpleToast(this, getString(R.string.no_read_log_perm), true, true);
@@ -373,7 +373,7 @@ public class FCLogService extends Service implements Runnable {
     }
 
     //清除日志
-    void cleanLog() {
+    private void cleanLog() {
         Log.d(TAG, "cleanLog: start");
         String CLEAN_LOG_CMD = "logcat -c";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)

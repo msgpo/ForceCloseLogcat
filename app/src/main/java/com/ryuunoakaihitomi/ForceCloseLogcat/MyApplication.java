@@ -13,6 +13,8 @@ import android.util.Log;
 
 import java.io.File;
 
+/*Caused by: java.lang.IllegalAccessException: java.lang.Class<com.ryuunoakaihitomi.ForceCloseLogcat.MyApplication> is not accessible from java.lang.Class<android.app.Instrumentation>*/
+@SuppressWarnings("WeakerAccess")
 public class MyApplication extends Application implements Thread.UncaughtExceptionHandler {
     private static final String TAG = "MyApplication";
     @SuppressLint("StaticFieldLeak")
@@ -72,12 +74,12 @@ public class MyApplication extends Application implements Thread.UncaughtExcepti
      *
      * @return boolean
      */
-    boolean isDebuggable() {
+    private boolean isDebuggable() {
         return (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
     }
 
     //获取语言类型字串
-    String getLanguage() {
+    private String getLanguage() {
         Configuration configuration = getApplicationContext().getResources().getConfiguration();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             return configuration.getLocales().get(0).getLanguage();

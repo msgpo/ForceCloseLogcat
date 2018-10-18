@@ -5,8 +5,9 @@ package com.ryuunoakaihitomi.ForceCloseLogcat;
  * 日志示例："04-30 04:37:25.233  1486  1486 I chatty  : uid=1000 system_server expire 1 line"
  */
 
-@SuppressWarnings("WeakerAccess")
-public class LogObject {
+
+@SuppressWarnings("CanBeFinal")
+class LogObject {
     @SuppressWarnings("FieldCanBeLocal")
     private final String
             SPLIT_REGEX = " +",
@@ -20,26 +21,26 @@ public class LogObject {
         logSplit = srcLog.split(SPLIT_REGEX);
     }
 
-    public String getDate() {
+    String getDate() {
         return logSplit[0];
     }
 
     /**
      * @return 时分秒
      */
-    public String getTime() {
+    String getTime() {
         return logSplit[1];
     }
 
-    public String getPID() {
+    String getPID() {
         return logSplit[2];
     }
 
-    public String getTID() {
+    String getTID() {
         return logSplit[3];
     }
 
-    public String getLevel() {
+    String getLevel() {
         return logSplit[4];
     }
 
@@ -54,7 +55,7 @@ public class LogObject {
     /**
      * @return 取得日志正文
      */
-    public String getRaw() {
+    String getRaw() {
         return srcLog.substring(srcLog.indexOf(RAW_SEPARATOR) + RAW_SEPARATOR.length());
     }
 }

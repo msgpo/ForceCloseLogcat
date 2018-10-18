@@ -1,9 +1,8 @@
 package com.ryuunoakaihitomi.ForceCloseLogcat;
 
-import android.app.ActivityManager;
 import android.app.Application;
-import android.content.Context;
 import android.content.Intent;
+import android.os.Process;
 import android.util.Log;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
@@ -15,6 +14,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 //https://github.com/wasdennnoch/Scoop
 
+@SuppressWarnings("WeakerAccess")
 public class XposedHookPlugin implements IXposedHookLoadPackage {
 
     static final String INTENT_ACTION = "tk.wasdennnoch.scoop.EXCEPTION";
@@ -41,7 +41,7 @@ public class XposedHookPlugin implements IXposedHookLoadPackage {
                     .putExtra(INTENT_PACKAGE_NAME, mApplication.getPackageName())
                     .putExtra(INTENT_TIME, System.currentTimeMillis())
                     .putExtra(INTENT_STACKTRACE, Log.getStackTraceString(t))
-                    .putExtra(INTENT_PID, String.valueOf(getPIDFromContext(mApplication)));
+                    .putExtra(INTENT_PID, String.valueOf(Process.myPid()));
             XposedBridge.log(TAG + " StackTrace Description: " + description);
             // Just send everything here because it costs no performance (well, technically
             // it does, but the process is about to die anyways, so I don't care).
@@ -100,14 +100,5 @@ public class XposedHookPlugin implements IXposedHookLoadPackage {
             i++;
         } while ((clazz = clazz.getSuperclass()) != null);
         Log.d(TAG, "hookUncaughtException (" + mPkg + "): No class found to hook!");
-    }
-
-    private int getPIDFromContext(Context context) {
-        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        assert activityManager != null;
-        for (ActivityManager.RunningAppProcessInfo info : activityManager.getRunningAppProcesses())
-            if (info.processName.equals(context.getPackageName()))
-                return info.pid;
-        return -1;
     }
 }

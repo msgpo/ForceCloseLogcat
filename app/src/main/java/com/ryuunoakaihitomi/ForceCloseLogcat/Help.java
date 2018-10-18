@@ -90,7 +90,7 @@ public class Help extends Activity {
         Utils.simpleToast(this, String.format(getString(R.string.help_toast), Utils.getAppVersionName(this, getPackageName()), BuildConfig.APK_PACK_TIME, getString(R.string.help_update_time)), false, false);
     }
 
-    void openURL(String link) {
+    private void openURL(String link) {
         try {
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(link)));
         } catch (ActivityNotFoundException e) {

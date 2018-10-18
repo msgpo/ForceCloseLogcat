@@ -5,7 +5,7 @@ import android.util.Log;
 /**
  * FC信息桥：只包括Getter/Setter和调试日志输出的静态Java Bean
  */
-public class FCLogInfoBridge {
+class FCLogInfoBridge {
     private static final String TAG = "FCLogInfoBridge";
     private static String
             logPath,
