@@ -108,7 +108,7 @@ class NoticeBar {
                 if (icon instanceof BitmapDrawable)
                     builder.setLargeIcon(((BitmapDrawable) icon).getBitmap());
                 else {
-                    //AdaptiveIconDrawable or LayerDrawable
+                    //AdaptiveIconDrawable or LayerDrawable?
                     Bitmap bitmap = Bitmap.createBitmap(icon.getIntrinsicWidth(), icon.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
                     Canvas canvas = new Canvas(bitmap);
                     icon.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
