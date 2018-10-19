@@ -44,7 +44,7 @@ class LogObject {
         return logSplit[4];
     }
 
-    public String getTag() {
+    String getTag() {
         String tagRaw = logSplit[5];
         int separatorPos = tagRaw.length() - LONG_TAG_SEPARATOR.length();
         return LONG_TAG_SEPARATOR.equals(tagRaw.substring(separatorPos))

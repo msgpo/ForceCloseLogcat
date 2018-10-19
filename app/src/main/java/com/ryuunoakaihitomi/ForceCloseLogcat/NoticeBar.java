@@ -104,10 +104,11 @@ class NoticeBar {
         else {
             try {
                 Drawable icon = c.getPackageManager().getApplicationIcon(FCLogInfoBridge.getFcPackageName());
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || icon instanceof BitmapDrawable)
+                Log.d(TAG, "onFCFounded: icon -> " + icon.getClass().getSimpleName());
+                if (icon instanceof BitmapDrawable)
                     builder.setLargeIcon(((BitmapDrawable) icon).getBitmap());
                 else {
-                    //AdaptiveIconDrawable?
+                    //AdaptiveIconDrawable or LayerDrawable
                     Bitmap bitmap = Bitmap.createBitmap(icon.getIntrinsicWidth(), icon.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
                     Canvas canvas = new Canvas(bitmap);
                     icon.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());

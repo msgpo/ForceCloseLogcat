@@ -152,7 +152,15 @@ public class FCLogService extends Service implements Runnable {
     @Override
     public void onCreate() {
         super.onCreate();
+        final long rootStartTime = System.currentTimeMillis();
         isRoot = isRoot();
+        final long interval = System.currentTimeMillis() - rootStartTime;
+        if (interval > 1000) {
+            Log.w(TAG, "onCreate: Require root permission timeout(" + interval + "ms,>1s).Are you did it for the first time?");
+            onCreate();
+            return;
+        } else
+            Log.v(TAG, "Root Interval:" + interval + "ms");
         boolean isReadLogPermissionGranted = checkLogPerm();
         isAlive = true;
         cleanLog();
@@ -202,6 +210,7 @@ public class FCLogService extends Service implements Runnable {
     public void onTrimMemory(int level) {
         Log.i(TAG, "onTrimMemory: level:" + level);
         System.gc();
+        System.runFinalization();
     }
 
     @Override
