@@ -29,7 +29,7 @@ class RuntimeEnvInfo {
             infoBody += "version name=" + Utils.getAppVersionName(context, FCLogInfoBridge.getFcPackageName()) + "\n";
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            infoBody += "supported abis=" + stringArrayToString(Build.SUPPORTED_ABIS, " & ") + "\n";
+            infoBody += "supported ABIs=" + stringArrayToString(Build.SUPPORTED_ABIS, " & ") + "\n";
         } else {
             infoBody += "cpu abi=" + Build.CPU_ABI + "\n";
             infoBody += "cpu abi2=" + Build.CPU_ABI2 + "\n";

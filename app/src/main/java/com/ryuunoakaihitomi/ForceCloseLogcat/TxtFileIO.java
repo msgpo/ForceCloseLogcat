@@ -1,5 +1,7 @@
 package com.ryuunoakaihitomi.ForceCloseLogcat;
 
+import android.util.Log;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -11,10 +13,11 @@ import java.io.IOException;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
 class TxtFileIO {
+    private static final String TAG = "TxtFileIO";
 
     //删
     static void D(String path) {
-        DKernel(new File(path));
+        dInternal(new File(path));
     }
 
     //写
@@ -30,7 +33,7 @@ class TxtFileIO {
             fos.write(bytes);
             fos.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.w(TAG, "W: ", e);
         }
     }
 
@@ -46,13 +49,13 @@ class TxtFileIO {
             res = new String(buffer, "UTF-8");
             fis.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(TAG, "R: ", e);
         }
         return res;
     }
 
     //删(内部)
-    private static void DKernel(File f) {
+    private static void dInternal(File f) {
         if (f.isFile()) {
             f.delete();
             return;
@@ -64,7 +67,7 @@ class TxtFileIO {
                 return;
             }
             for (File childFile : childFiles) {
-                DKernel(childFile);
+                dInternal(childFile);
             }
             f.delete();
         }

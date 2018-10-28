@@ -55,6 +55,7 @@ public class LogOperaBcReceiver extends BroadcastReceiver {
                     logPath = intent.getStringExtra(EXTAG_PATH);
                     TxtFileIO.D(logPath);
                     ((NotificationManager) Objects.requireNonNull(context.getSystemService(Context.NOTIFICATION_SERVICE))).cancel(intent.getIntExtra(EXTAG_NOTICE_ID, -1));
+                    Utils.simpleToast(context, context.getString(R.string.deleted), true, false);
                 }
             },
             new BroadcastReceiver() {

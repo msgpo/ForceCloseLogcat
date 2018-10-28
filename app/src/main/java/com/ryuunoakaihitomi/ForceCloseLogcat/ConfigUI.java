@@ -205,7 +205,7 @@ public class ConfigUI extends Activity {
                         finish();
                     }
                 })
-                .setNegativeButton(R.string.help, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.help_btn, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         startActivity(new Intent(ConfigUI.this, Help.class));
@@ -225,6 +225,15 @@ public class ConfigUI extends Activity {
             @Override
             public boolean onLongClick(View v) {
                 throw new Error("MyCrash Test");
+            }
+        });
+        //删除日志目录
+        dialog.getButton(DialogInterface.BUTTON_NEGATIVE).setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                TxtFileIO.D(FCLogService.LOG_DIR);
+                Utils.simpleToast(ConfigUI.this, getString(R.string.deleted), false, false);
+                return true;
             }
         });
     }

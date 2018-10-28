@@ -1,5 +1,7 @@
 package com.ryuunoakaihitomi.ForceCloseLogcat;
 
+import android.util.Log;
+
 /**
  * 封装类：对logcat -v threadtime输出的日志进行的解析
  * 日志示例："04-30 04:37:25.233  1486  1486 I chatty  : uid=1000 system_server expire 1 line"
@@ -8,6 +10,8 @@ package com.ryuunoakaihitomi.ForceCloseLogcat;
 
 @SuppressWarnings("CanBeFinal")
 class LogObject {
+    private static final String TAG = "LogObject";
+
     @SuppressWarnings("FieldCanBeLocal")
     private final String
             SPLIT_REGEX = " +",
@@ -45,11 +49,19 @@ class LogObject {
     }
 
     String getTag() {
-        String tagRaw = logSplit[5];
-        int separatorPos = tagRaw.length() - LONG_TAG_SEPARATOR.length();
-        return LONG_TAG_SEPARATOR.equals(tagRaw.substring(separatorPos))
-                ? tagRaw.substring(0, separatorPos)
-                : tagRaw;
+        try {
+            String tagRaw = logSplit[5];
+            int separatorPos = tagRaw.length() - LONG_TAG_SEPARATOR.length();
+            return LONG_TAG_SEPARATOR.equals(tagRaw.substring(separatorPos))
+                    ? tagRaw.substring(0, separatorPos)
+                    : tagRaw;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            Log.e(TAG, "getTag: ArrayIndexOutOfBoundsException! srcLog=" + srcLog, e);
+            //标准格式日志对象
+            srcLog = "04-30 04:37:25.233  1486  1486 I chatty  : uid=1000 system_server expire 1 line";
+            logSplit = srcLog.split(SPLIT_REGEX);
+            return "";
+        }
     }
 
     /**
