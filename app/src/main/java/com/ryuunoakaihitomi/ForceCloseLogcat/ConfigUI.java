@@ -231,7 +231,10 @@ public class ConfigUI extends Activity {
         dialog.getButton(DialogInterface.BUTTON_NEGATIVE).setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
+                TrueTimingLogger logger = new TrueTimingLogger(TAG, "delete dir");
                 TxtFileIO.D(FCLogService.LOG_DIR);
+                logger.addSplit("must invoke addSplit()");
+                logger.dumpToLog();
                 Utils.simpleToast(ConfigUI.this, getString(R.string.deleted), false, false);
                 return true;
             }

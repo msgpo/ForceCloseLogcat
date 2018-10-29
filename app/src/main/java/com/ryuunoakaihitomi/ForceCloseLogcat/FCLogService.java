@@ -35,6 +35,7 @@ public class FCLogService extends Service implements Runnable {
     static final String KILL_SIGNAL = "killAction";
     private static final int NOTICE_ID = 1989;
     private static final String TAG = "FCLogService";
+    private static final TrueTimingLogger timingLogger = new TrueTimingLogger("", "");
     //分钟接收器：检查权限
     private final BroadcastReceiver tickReceiver = new BroadcastReceiver() {
         @Override
@@ -209,8 +210,11 @@ public class FCLogService extends Service implements Runnable {
     @Override
     public void onTrimMemory(int level) {
         Log.i(TAG, "onTrimMemory: level:" + level);
+        timingLogger.reset(TAG, "onTrimMemory");
         System.gc();
         System.runFinalization();
+        timingLogger.dumpToLog();
+        timingLogger.reset();
     }
 
     @Override
@@ -276,11 +280,13 @@ public class FCLogService extends Service implements Runnable {
                                 (ANR_SIGNAL[0].equals(headerJudge.getTag())
                                         && ANR_SIGNAL[1].equals(headerJudge.getLevel())
                                         && headerJudge.getRaw().contains(ANR_SIGNAL[2]))) {
+                            timingLogger.reset(TAG, "Crash caught");
                             final long start = System.currentTimeMillis();
                             Log.d(TAG, "run: CrashLogPrinter: PID:" + headerJudge.getPID() + " TID:" + headerJudge.getTID());
                             //给低性能设备的crash日志输出进行礼让（测试）
                             Thread.yield();
                             Log.d(TAG, "run: yield()");
+                            timingLogger.addSplit("yield");
                             if (headerJudge.getRaw().contains(J_SYS_SIGNAL)) {
                                 //对应的标签为"Android 系统"
                                 FCLogInfoBridge.setFcPackageName("android");
@@ -290,10 +296,13 @@ public class FCLogService extends Service implements Runnable {
                                     //如果用xposed，JVM FC crash不再需要操心
                                     if (ConfigUI.isXposedActive() && ConfigMgr.getBoolean(ConfigMgr.Options.XPOSED)) {
                                         Log.d(TAG, "run: Exit for XposedHookPlugin.");
+                                        timingLogger.dumpToLog();
+                                        timingLogger.reset();
                                         continue;
                                     }
                                 }
                             }
+                            timingLogger.addSplit("Android & Xposed judgement");
                             while (Arrays.asList(new String[]{J_SIGNAL[0], N_SIGNAL[0], ANR_SIGNAL[0]}).contains(
                                     new LogObject(line = bufferedReader.readLine()).getTag())) {
                                 if (line.contains(J_PROC_SIGNAL[0])) {
@@ -312,6 +321,7 @@ public class FCLogService extends Service implements Runnable {
                                     FCLogInfoBridge.setFcPackageName(headerJudge.getRaw().substring(headerJudge.getRaw().indexOf(ANR_PROC_SIGNAL[0]) + ANR_PROC_SIGNAL[0].length()).split(" +")[0]);
                                 }
                             }
+                            timingLogger.addSplit("get crash package info");
                             //裁剪包名：a.b.c:xxx
                             String pkgNameCutTmp = FCLogInfoBridge.getFcPackageName();
                             if (pkgNameCutTmp.contains(":"))
@@ -321,6 +331,7 @@ public class FCLogService extends Service implements Runnable {
                                 new Thread(new Runnable() {
                                     @Override
                                     public void run() {
+                                        timingLogger.addSplit("new thread");
                                         boolean
                                                 isAppInWhiteList = false,
                                                 isWhiteListAvailable = ConfigMgr.getBoolean(ConfigMgr.Options.WHITE_LIST_SWITCH),
@@ -331,6 +342,7 @@ public class FCLogService extends Service implements Runnable {
                                             e.printStackTrace();
                                         }
                                         Log.i(TAG, "run: isAppInWhiteList:" + isAppInWhiteList + " isWhiteListAvailable:" + isWhiteListAvailable + " isQuietModeEnable:" + isQuietModeEnable);
+                                        timingLogger.addSplit("read config");
                                         if (!isWhiteListAvailable || !isAppInWhiteList) {
                                             String time = Calendar.getInstance().get(Calendar.YEAR)
                                                     + "-" + headerJudge.getDate()
@@ -350,8 +362,10 @@ public class FCLogService extends Service implements Runnable {
                                                 logFilter = "ActivityManager:E";
                                             Log.i(TAG, "run: set logcat filter:" + logFilter);
                                             final String LOG_FILTER_OUTPUT_CMD = "logcat -v raw -d -s " + logFilter;
+                                            timingLogger.addSplit("adjust logcat parameter");
                                             TxtFileIO.W(path, cmd(LOG_FILTER_OUTPUT_CMD, Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
                                                     .replaceAll(LOG_BUFFER_DIVIDER + ".*\n", "").replace(N_SIGNAL[2] + System.getProperty("line.separator"), ""));
+                                            timingLogger.addSplit("write log");
                                             long logLength = new File(path).length();
                                             Log.d(TAG, "run: logLength:" + logLength);
                                             FCLogInfoBridge.setLogPath(path);
@@ -359,10 +373,14 @@ public class FCLogService extends Service implements Runnable {
                                                 NoticeBar.onFCFounded(FCLogService.this);
                                             else
                                                 震える(FCLogService.this);
+                                            timingLogger.addSplit("send signal");
                                         }
                                         Log.i(TAG, "run: A Workflow in " + (System.currentTimeMillis() - start) + "ms");
                                         //不清除日志在短时间发生多次崩溃时将会重复输出，但极不方便调试
                                         cleanLog();
+                                        timingLogger.addSplit("clean log cache");
+                                        timingLogger.dumpToLog();
+                                        timingLogger.reset();
                                     }
                                 }).start();
                             }
