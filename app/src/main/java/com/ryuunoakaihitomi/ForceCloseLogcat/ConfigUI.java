@@ -105,13 +105,16 @@ public class ConfigUI extends Activity {
                             public void run() {
                                 final JSONObject appListSaver = new JSONObject();
                                 final PackageManager manager = getPackageManager();
+                                TrueTimingLogger logger = new TrueTimingLogger(TAG, "app list");
                                 List<PackageInfo> infos = manager.getInstalledPackages(0);
+                                logger.addSplit("get list info");
                                 //删除自身选项
                                 for (PackageInfo myInfo : infos)
                                     if (myInfo.packageName.equals(getPackageName())) {
                                         infos.remove(myInfo);
                                         break;
                                     }
+                                logger.addSplit("delete me");
                                 //根据当前区域按照标签排列
                                 Collections.sort(infos, new Comparator<PackageInfo>() {
                                     @Override
@@ -120,6 +123,7 @@ public class ConfigUI extends Activity {
                                                 .compare(o1.applicationInfo.loadLabel(manager).toString(), o2.applicationInfo.loadLabel(manager).toString());
                                     }
                                 });
+                                logger.addSplit("sort");
                                 int appCount = infos.size();
                                 Log.i(TAG, "run: appCount:" + appCount + "+1");
                                 final String[] appName = new String[appCount], appList = new String[appCount], appDetails = new String[appCount];
@@ -139,6 +143,7 @@ public class ConfigUI extends Activity {
                                     appDetails[i] = (appName[i].equals(appList[i] = info.packageName) ? "" : appList[i] + "\n") + (isSysApp ? getString(R.string.sys_app) : getString(R.string.usr_app));
                                     cfgShow[i] = appListSaver.optBoolean(appList[i]);
                                 }
+                                logger.addSplit("get config");
                                 alertDialogBuilder.setMultiChoiceItems(appName, cfgShow, new DialogInterface.OnMultiChoiceClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which, boolean isChecked) {
@@ -172,6 +177,8 @@ public class ConfigUI extends Activity {
                                                 }, 0);
                                             }
                                         });
+                                logger.dumpToLog();
+                                logger.reset();
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
