@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 
 import org.json.JSONException;
@@ -172,6 +173,7 @@ public class ConfigUI extends Activity {
                                                 new Handler().postDelayed(new Runnable() {
                                                     @Override
                                                     public void run() {
+                                                        setSecureFlag(false);
                                                         recreate();
                                                     }
                                                 }, 0);
@@ -197,6 +199,7 @@ public class ConfigUI extends Activity {
                                             }
                                         });
                                         loadingDialog.dismiss();
+                                        setSecureFlag(true);
                                         mainDialogCreate.show();
                                     }
                                 });
@@ -246,5 +249,13 @@ public class ConfigUI extends Activity {
                 return true;
             }
         });
+    }
+
+    void setSecureFlag(boolean isSecure) {
+        int flag = WindowManager.LayoutParams.FLAG_SECURE;
+        if (isSecure)
+            getWindow().setFlags(flag, flag);
+        else
+            getWindow().clearFlags(flag);
     }
 }

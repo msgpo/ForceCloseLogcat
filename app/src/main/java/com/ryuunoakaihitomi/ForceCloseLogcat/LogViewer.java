@@ -31,8 +31,8 @@ public class LogViewer extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final int fullScrFlag = WindowManager.LayoutParams.FLAG_FULLSCREEN;
-        getWindow().setFlags(fullScrFlag, fullScrFlag);
+        final int flags = WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.FLAG_SECURE;
+        getWindow().setFlags(flags, flags);
         path = getIntent().getStringExtra(EXTAG_PATH);
         envInfo = getIntent().getStringExtra(EXTAG_ENVINFO);
         String logBody = TxtFileIO.R(path);
