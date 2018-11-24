@@ -29,6 +29,8 @@ public class MyApplication extends Application implements Thread.UncaughtExcepti
         //严格模式
         StrictMode.ThreadPolicy threadPolicy = new StrictMode.ThreadPolicy.Builder()
                 .detectAll()
+                .permitDiskReads()
+                .permitNetwork()
                 .penaltyLog()
                 .build();
         if (isDebuggable())
@@ -59,7 +61,7 @@ public class MyApplication extends Application implements Thread.UncaughtExcepti
     public void uncaughtException(Thread t, Throwable e) {
         final int CRASH_UI_FREEZE_DELAY = 1000;
         Log.e(TAG, "uncaughtException:" + t.getId(), e);
-        FCLogInfoBridge.setFcPackageName(this.getClass().getPackage().getName());
+        FCLogInfoBridge.setFcPackageName(this.getPackageName());
         FCLogInfoBridge.setFcTime(String.valueOf(System.currentTimeMillis()));
         TxtFileIO.W(FCLogService.LOG_DIR + "/" + FCLogInfoBridge.getFcTime() + "_MyCrash.log",
                 "EnvInfo:\n" + RuntimeEnvInfo.get(context) + "\nFCLog:\n"

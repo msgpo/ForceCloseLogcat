@@ -59,6 +59,7 @@ class ConfigMgr {
                 ONE_NOTICE = "1noti",
                 WHITE_LIST = "whitelist",
                 WHITE_LIST_SWITCH = "wlswi",
+                WHITE_LIST_TEXT = "wlstxt",
                 XPOSED = "xposed";
     }
 }

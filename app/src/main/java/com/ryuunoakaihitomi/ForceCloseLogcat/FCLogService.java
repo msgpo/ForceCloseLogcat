@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Vibrator;
+import android.text.TextUtils;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -326,7 +327,7 @@ public class FCLogService extends Service implements Runnable {
                             String pkgNameCutTmp = FCLogInfoBridge.getFcPackageName();
                             if (pkgNameCutTmp.contains(":"))
                                 FCLogInfoBridge.setFcPackageName(pkgNameCutTmp.split(":")[0]);
-                            if (!this.getClass().getPackage().getName().equals(FCLogInfoBridge.getFcPackageName())) {
+                            if (!this.getPackageName().equals(FCLogInfoBridge.getFcPackageName())) {
                                 Log.v(TAG, "run: new Thread");
                                 new Thread(new Runnable() {
                                     @Override
@@ -334,6 +335,7 @@ public class FCLogService extends Service implements Runnable {
                                         timingLogger.addSplit("new thread");
                                         boolean
                                                 isAppInWhiteList = false,
+                                                isAppInCustomizeWhiteListTextFilter = false,
                                                 isWhiteListAvailable = ConfigMgr.getBoolean(ConfigMgr.Options.WHITE_LIST_SWITCH),
                                                 isQuietModeEnable = ConfigMgr.getBoolean(ConfigMgr.Options.QUIET_MODE);
                                         try {
@@ -341,9 +343,16 @@ public class FCLogService extends Service implements Runnable {
                                         } catch (JSONException e) {
                                             e.printStackTrace();
                                         }
-                                        Log.i(TAG, "run: isAppInWhiteList:" + isAppInWhiteList + " isWhiteListAvailable:" + isWhiteListAvailable + " isQuietModeEnable:" + isQuietModeEnable);
+                                        if (!TextUtils.isEmpty(ConfigMgr.getString(ConfigMgr.Options.WHITE_LIST_TEXT)))
+                                            isAppInCustomizeWhiteListTextFilter = FCLogInfoBridge.getFcPackageName().contains(ConfigMgr.getString(ConfigMgr.Options.WHITE_LIST_TEXT));
+                                        Log.i(TAG, "run: isAppInWhiteList:" + isAppInWhiteList
+                                                + " isWhiteListAvailable:" + isWhiteListAvailable
+                                                + " isQuietModeEnable:" + isQuietModeEnable
+                                                + " isAppInCustomizeWhiteListTextFilter:" + isAppInCustomizeWhiteListTextFilter);
                                         timingLogger.addSplit("read config");
                                         if (!isWhiteListAvailable || !isAppInWhiteList) {
+                                            if (isWhiteListAvailable && isAppInCustomizeWhiteListTextFilter)
+                                                return;
                                             String time = Calendar.getInstance().get(Calendar.YEAR)
                                                     + "-" + headerJudge.getDate()
                                                     + " " + headerJudge.getTime();

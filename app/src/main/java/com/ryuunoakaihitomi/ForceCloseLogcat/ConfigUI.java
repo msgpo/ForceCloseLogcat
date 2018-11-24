@@ -8,12 +8,15 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.EditText;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -125,13 +128,12 @@ public class ConfigUI extends Activity {
                                     }
                                 });
                                 logger.addSplit("sort");
-                                int appCount = infos.size();
+                                final int appCount = infos.size();
                                 Log.i(TAG, "run: appCount:" + appCount + "+1");
-                                final String[] appName = new String[appCount], appList = new String[appCount], appDetails = new String[appCount];
+                                final String[] appName = new String[appCount], appList = new String[appCount];
                                 boolean[] cfgShow = new boolean[appCount];
                                 for (int i = 0; i < appCount; i++) {
                                     PackageInfo info = infos.get(i);
-                                    boolean isSysApp = (info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
                                     try {
                                         //初始化配置列表
                                         appListSaver.put(info.packageName, new JSONObject(ConfigMgr.getString(ConfigMgr.Options.WHITE_LIST)).optBoolean(info.packageName));
@@ -140,8 +142,8 @@ public class ConfigUI extends Activity {
                                     }
                                     //应用标签
                                     appName[i] = info.applicationInfo.loadLabel(manager).toString();
-                                    //包名类别
-                                    appDetails[i] = (appName[i].equals(appList[i] = info.packageName) ? "" : appList[i] + "\n") + (isSysApp ? getString(R.string.sys_app) : getString(R.string.usr_app));
+                                    //pkgName
+                                    appList[i] = info.packageName;
                                     cfgShow[i] = appListSaver.optBoolean(appList[i]);
                                 }
                                 logger.addSplit("get config");
@@ -156,7 +158,32 @@ public class ConfigUI extends Activity {
                                     }
                                 })
                                         .setNeutralButton(null, null)
-                                        .setNegativeButton(null, null)
+                                        //自定义过滤文本
+                                        .setNegativeButton(R.string.customize_text, new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                //不用ConfigUI.this以便套用系统默认主题
+                                                final EditText editor = new EditText(getApplicationContext());
+                                                editor.setTextColor(Color.WHITE);
+                                                editor.setHint(R.string.customize_hint);
+                                                editor.setHintTextColor(Color.GRAY);
+                                                editor.setText(ConfigMgr.getString(ConfigMgr.Options.WHITE_LIST_TEXT));
+                                                alertDialogBuilder.setTitle(R.string.customize_filter)
+                                                        .setMultiChoiceItems(null, null, null)
+                                                        .setNegativeButton(null, null)
+                                                        .setView(editor)
+                                                        .setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
+                                                            @Override
+                                                            public void onClick(DialogInterface dialog, int which) {
+                                                                String input = editor.getText().toString();
+                                                                ConfigMgr.setString(ConfigMgr.Options.WHITE_LIST_TEXT, input);
+                                                                ConfigMgr.saveAll();
+                                                                Utils.simpleToast(ConfigUI.this, getString(R.string.saved) + '\n' + input, false, false);
+                                                                finish();
+                                                            }
+                                                        }).show();
+                                            }
+                                        })
                                         .setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
@@ -192,7 +219,16 @@ public class ConfigUI extends Activity {
                                                 mainDialogCreate.getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                                                     @Override
                                                     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                                                        Utils.simpleToast(ConfigUI.this, appDetails[position], false, false);
+                                                        PackageInfo info = null;
+                                                        try {
+                                                            info = manager.getPackageInfo(appList[position], 0);
+                                                        } catch (PackageManager.NameNotFoundException ignored) {
+                                                        }
+                                                        assert info != null;
+                                                        String appDetails = (appName[position].equals(appList[position]) ? "" : appList[position] + "\n")
+                                                                + ((info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0 ? getString(R.string.sys_app) : getString(R.string.usr_app))
+                                                                + String.format(System.lineSeparator() + "%s(%s)", info.versionName, Build.VERSION.SDK_INT >= Build.VERSION_CODES.P ? info.getLongVersionCode() : info.versionCode);
+                                                        Utils.simpleToast(ConfigUI.this, appDetails, false, false);
                                                         return true;
                                                     }
                                                 });
