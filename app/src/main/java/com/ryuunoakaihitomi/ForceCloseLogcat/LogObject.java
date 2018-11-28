@@ -5,6 +5,7 @@ import android.util.Log;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 /**
  * 封装类：对logcat -v threadtime输出的日志进行的解析
@@ -134,5 +135,11 @@ class LogObject implements LogObjMethods {
     @Override
     public String getRaw() {
         return srcLog.substring(srcLog.indexOf(RAW_SEPARATOR) + RAW_SEPARATOR.length());
+    }
+
+    //初始化动态代理对象
+    static LogObjMethods initLogObjDynProxyInstance(LogObject logObject) {
+        Class cls = LogObject.class;
+        return ((LogObjMethods) Proxy.newProxyInstance(cls.getClassLoader(), cls.getInterfaces(), new ExceptionCatcher(logObject)));
     }
 }
