@@ -103,6 +103,7 @@ class LogObject implements LogObjMethods {
         return logSplit[1];
     }
 
+    @Override
     public String getPID() {
         return logSplit[2];
     }
