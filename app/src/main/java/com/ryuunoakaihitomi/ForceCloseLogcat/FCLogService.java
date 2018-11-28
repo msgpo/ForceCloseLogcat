@@ -23,6 +23,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Calendar;
 
@@ -268,7 +269,7 @@ public class FCLogService extends Service implements Runnable {
                     }
                     if (!line.contains(LOG_BUFFER_DIVIDER)) {
                         FCLogInfoBridge.log = line;
-                        final LogObject headerJudge = new LogObject(line);
+                        final LogObjMethods headerJudge = initLogObjDynProxyInstance(new LogObject(line));
                         boolean isJavaFCCrash = (J_SIGNAL[0].equals(headerJudge.getTag())
                                 && J_SIGNAL[1].equals(headerJudge.getLevel())
                                 && headerJudge.getRaw().contains(J_SIGNAL[2]));
@@ -307,7 +308,8 @@ public class FCLogService extends Service implements Runnable {
                             while (Arrays.asList(new String[]{J_SIGNAL[0], N_SIGNAL[0], ANR_SIGNAL[0]}).contains(
                                     new LogObject(line = bufferedReader.readLine()).getTag())) {
                                 if (line.contains(J_PROC_SIGNAL[0])) {
-                                    FCLogInfoBridge.setFcPackageName(new LogObject(line).getRaw().substring(J_PROC_SIGNAL[0].length(), new LogObject(line).getRaw().indexOf(J_PROC_SIGNAL[1])));
+                                    LogObjMethods logObj = initLogObjDynProxyInstance(new LogObject(line));
+                                    FCLogInfoBridge.setFcPackageName(logObj.getRaw().substring(J_PROC_SIGNAL[0].length(), logObj.getRaw().indexOf(J_PROC_SIGNAL[1])));
                                     FCLogInfoBridge.setFcPID(line.subSequence(line.indexOf(J_PROC_SIGNAL[1]) + J_PROC_SIGNAL[1].length(), line.length()).toString());
                                 } else if (line.contains(N_PROC_SIGNAL[0]) && line.contains(N_PROC_SIGNAL[1])) {
                                     String pkgNameTmp = line.subSequence(line.indexOf(N_PROC_SIGNAL[0]) + N_PROC_SIGNAL[0].length(), line.indexOf(N_PROC_SIGNAL[1])).toString();
@@ -421,5 +423,11 @@ public class FCLogService extends Service implements Runnable {
         else if (isRoot)
             cmd(CLEAN_LOG_CMD, true);
         Log.d(TAG, "cleanLog: end");
+    }
+
+    //初始化动态代理对象
+    private LogObjMethods initLogObjDynProxyInstance(LogObject logObject) {
+        Class cls = LogObject.class;
+        return ((LogObjMethods) Proxy.newProxyInstance(cls.getClassLoader(), cls.getInterfaces(), new ExceptionCatcher(logObject)));
     }
 }

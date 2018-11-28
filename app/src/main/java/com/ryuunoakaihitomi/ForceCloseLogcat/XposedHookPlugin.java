@@ -37,7 +37,7 @@ public class XposedHookPlugin implements IXposedHookLoadPackage {
             Throwable t = (Throwable) param.args[1];
             String packageName = mApplication.getPackageName();
             String description = t.toString();
-            Intent intent = new Intent(INTENT_ACTION)
+            @SuppressWarnings("ConstantConditions") Intent intent = new Intent(INTENT_ACTION)
                     .setClassName(XposedHookPlugin.class.getPackage().getName(), LogOperaBcReceiver.class.getName())
                     .putExtra(INTENT_PACKAGE_NAME, packageName)
                     .putExtra(INTENT_TIME, System.currentTimeMillis())
