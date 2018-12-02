@@ -36,7 +36,7 @@ class ExceptionCatcher implements InvocationHandler {
 
     private Object instance;
 
-    ExceptionCatcher(Object instance) {
+    ExceptionCatcher(LogObject instance) {
         this.instance = instance;
     }
 
