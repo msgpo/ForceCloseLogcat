@@ -1,6 +1,7 @@
 package com.ryuunoakaihitomi.ForceCloseLogcat;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
@@ -21,6 +22,7 @@ import java.io.InputStreamReader;
 public class Help extends Activity {
     private final String DONATE_LINK = "http://ryuunoakaihitomi.info/donate/";
     private final String DOWNLOAD_LINK = "https://github.com/ryuunoakaihitomi/ForceCloseLogcat/releases";
+    AlertDialog dialog;
 
     /**
      * 将输入流转为字符串
@@ -86,7 +88,8 @@ public class Help extends Activity {
                     finish();
                 }
             });
-        builder.show();
+        dialog = builder.create();
+        dialog.show();
         Utils.simpleToast(this, String.format(getString(R.string.help_toast), Utils.getAppVersionName(this, getPackageName()), BuildConfig.APK_PACK_TIME, getString(R.string.help_update_time)), false, false);
     }
 
@@ -98,5 +101,12 @@ public class Help extends Activity {
             e.printStackTrace();
         }
         finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        dialog.dismiss();
+        dialog = null;
+        super.onDestroy();
     }
 }
