@@ -6,8 +6,8 @@ android {
         applicationId "com.ryuunoakaihitomi.ForceCloseLogcat"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 62
-        versionName "6.0.9.1"
+        versionCode 63
+        versionName "6.0.9.2"
         buildConfigField("String", "APK_PACK_TIME", "\"" + new Date() + "\"")
     }
     buildTypes {

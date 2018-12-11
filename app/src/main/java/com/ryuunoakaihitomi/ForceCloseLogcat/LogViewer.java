@@ -140,8 +140,10 @@ public class LogViewer extends Activity {
         Log.i(TAG, "onPause: isScreenOn:" + isScreenOn);
         if (isScreenOn) {
             //防止窗体泄露
-            dialog.dismiss();
-            dialog = null;
+            if (dialog != null) {
+                dialog.dismiss();
+                dialog = null;
+            }
             finish();
         }
     }

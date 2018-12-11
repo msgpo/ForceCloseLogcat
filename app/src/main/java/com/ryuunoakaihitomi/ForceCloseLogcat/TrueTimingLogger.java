@@ -104,6 +104,8 @@ public class TrueTimingLogger {
     }
 
     private void setField(Field field, Object value) {
+        if (field == null)
+            return;
         try {
             field.set(logger, value);
         } catch (IllegalAccessException e) {
@@ -114,7 +116,7 @@ public class TrueTimingLogger {
     private Object getField(Field field) {
         try {
             return field.get(logger);
-        } catch (IllegalAccessException e) {
+        } catch (IllegalAccessException | NullPointerException e) {
             Log.w(TAG, "getField: ", e);
         }
         return null;
