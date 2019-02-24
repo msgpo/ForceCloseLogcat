@@ -27,6 +27,7 @@ public class TrueTimingLogger {
      * @param label a string to be displayed with each log
      */
     public TrueTimingLogger(String tag, String label) {
+        ReflectionOnPie.clearClassLoaderInClass(TrueTimingLogger.class);
         logger = new TimingLogger(tag, label);
         initFields();
         reset(tag, label);

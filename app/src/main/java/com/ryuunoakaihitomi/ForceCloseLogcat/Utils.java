@@ -1,5 +1,6 @@
 package com.ryuunoakaihitomi.ForceCloseLogcat;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ClipData;
@@ -14,6 +15,10 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Objects;
 
 /**
@@ -91,5 +96,37 @@ class Utils {
     static int getDarkDialogTheme() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
                 android.R.style.Theme_DeviceDefault_Dialog_Alert : AlertDialog.THEME_DEVICE_DEFAULT_DARK;
+    }
+
+    /**
+     * https://blog.csdn.net/qq331710168/article/details/85320098
+     * 伪装成系统Toast以躲避通知权限检查...
+     * 调用影响全局
+     */
+    @SuppressWarnings("JavaReflectionMemberAccess")
+    @SuppressLint("PrivateApi")
+    static void defineSystemToast() {
+        try {
+            Method getServiceMethod = Toast.class.getDeclaredMethod("getService");
+            getServiceMethod.setAccessible(true);
+            final Object iNotificationManagerObj = getServiceMethod.invoke(null);
+            Class iNotificationManagerCls = Class.forName("android.app.INotificationManager");
+            Object iNotificationManagerProxy = Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[]{iNotificationManagerCls}, new InvocationHandler() {
+                @Override
+                public Object invoke(Object o, Method method, Object[] objects) throws Throwable {
+
+                    //强制使用系统Toast
+                    if ("enqueueToast".equals(method.getName())
+                            || "enqueueToastEx".equals(method.getName())) {  //华为p20 pro上为enqueueToastEx
+                        objects[0] = "android";
+                    }
+                    return method.invoke(iNotificationManagerObj, objects);
+                }
+            });
+            Field sServiceField = Toast.class.getDeclaredField("sService");
+            sServiceField.setAccessible(true);
+            sServiceField.set(null, iNotificationManagerProxy);
+        } catch (Exception ignored) {
+        }
     }
 }

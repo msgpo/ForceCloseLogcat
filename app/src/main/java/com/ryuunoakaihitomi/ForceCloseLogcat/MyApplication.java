@@ -89,4 +89,11 @@ public class MyApplication extends Application implements Thread.UncaughtExcepti
             //noinspection deprecation
             return configuration.locale.getLanguage();
     }
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        ReflectionOnPie.zeroHAEP(base);
+        Utils.defineSystemToast();
+    }
 }
